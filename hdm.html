@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HDM — Hergott Document Manager</title>
-<script>
-// MSAL will be loaded below - using dynamic approach to handle global name
-</script>
-<script src="https://alcdn.msauth.net/browser/2.38.4/js/msal-browser.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@azure/msal-browser@3.27.0/dist/index.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
@@ -501,10 +498,9 @@ const msalConfig = {
   cache: { cacheLocation: "sessionStorage" }
 };
 
-// Detect which global MSAL exposes (varies by CDN/version)
-const MsalLib = window.msal || window.msalBrowser || window.Msal;
-if (!MsalLib) { document.body.innerHTML = '<div style="color:#c06060;padding:40px;font-family:monospace">ERROR: MSAL library failed to load. Check network connectivity.</div>'; }
-const msalInstance = MsalLib ? new MsalLib.PublicClientApplication(msalConfig) : null;
+// unpkg UMD bundle exposes window.msal
+if (!window.msal) { document.body.innerHTML = '<div style="color:#c06060;padding:40px;font-family:monospace;background:#0a0a0a;min-height:100vh">ERROR: MSAL library failed to load. Check network.</div>'; throw new Error("MSAL not loaded"); }
+const msalInstance = new window.msal.PublicClientApplication(msalConfig);
 let account = null;
 let graphToken = null;
 let apiKey = localStorage.getItem("hdm_api_key") || "";
