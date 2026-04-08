@@ -550,10 +550,14 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
 // ── Config ───────────────────────────────────────────────────────────────────
 const CLIENT_ID = "fe6eb13e-8ea4-4eb4-9162-0c6cd68822a0";
 const TENANT_ID = "11435cd4-2fb6-4d2e-8298-2c2ad9694709";
-const ANTHROPIC_KEY = ""; // Set via prompt on first use
 const ROOT_FOLDER = "Hergott Document Manager";
-
 const SCOPES = ["Files.ReadWrite", "Sites.ReadWrite.All", "User.Read"];
+
+// Handle popup redirect — if this page is loaded inside a popup by MSAL, let it handle itself and stop
+if (window.opener && window.opener !== window) {
+  // This is a popup redirect — MSAL will handle it automatically via handleRedirectPromise
+  // Just initialize MSAL and let it close the popup
+}
 
 const TAXONOMY = {
   "Personal": ["Tax Returns","Insurance","Legal - Wills - Estate","Vehicles","Medical","Personal Receipts - Expenses","Living Skies Music Festival"],
@@ -566,8 +570,14 @@ const TAXONOMY = {
 
 // ── MSAL setup ───────────────────────────────────────────────────────────────
 const msalConfig = {
-  auth: { clientId: CLIENT_ID, authority: `https://login.microsoftonline.com/${TENANT_ID}`, redirectUri: window.location.origin + window.location.pathname },
-  cache: { cacheLocation: "sessionStorage" }
+  auth: { 
+    clientId: CLIENT_ID, 
+    authority: `https://login.microsoftonline.com/${TENANT_ID}`, 
+    redirectUri: window.location.origin + window.location.pathname,
+    postLogoutRedirectUri: window.location.origin + window.location.pathname
+  },
+  cache: { cacheLocation: "sessionStorage" },
+  system: { allowNativeBroker: false }
 };
 
 // MSAL UMD bundle confirmed at window.msal
