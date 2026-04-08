@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HDM — Hergott Document Manager</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-msal-browser/3.27.0/msal-browser.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --surf: #141414;
+    --surf2: #1e1e1e;
+    --surf3: #282828;
+    --bdr: #2a2a2a;
+    --acc: #c8a96e;
+    --acc-dim: #8a7245;
+    --grn: #7ab87a;
+    --grn-dim: #4a784a;
+    --red: #b86a6a;
+    --txt: #e2e2e2;
+    --txt2: #888;
+    --txt3: #484848;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--txt);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  #hdr {
+    background: var(--surf);
+    border-bottom: 1px solid var(--bdr);
+    padding: 13px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--acc);
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--txt3); font-weight: 400; }
+
+  .hdr-right { display: flex; align-items: center; gap: 12px; }
+
+  #auth-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 2px;
+    border: 1px solid var(--bdr);
+    background: var(--surf2);
+    color: var(--txt2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  #auth-btn:hover { border-color: var(--acc); color: var(--acc); }
+  #auth-btn.signed-in { border-color: var(--grn-dim); color: var(--grn); }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--txt3);
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--txt3);
+    transition: background 0.3s;
+  }
+  .dot.ok { background: var(--grn); box-shadow: 0 0 5px var(--grn-dim); }
+  .dot.err { background: var(--red); }
+  .dot.busy { background: var(--acc); animation: pulse 1s ease infinite; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── Main ── */
+  main {
+    flex: 1;
+    padding: 20px;
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* ── Step bar ── */
+  .stepbar {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 18px;
+  }
+
+  .step-seg {
+    flex: 1;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--bdr);
+    transition: background 0.4s;
+    position: relative;
+  }
+
+  .step-seg.done { background: var(--grn); }
+  .step-seg.active { background: var(--acc); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surf);
+    border: 1px solid var(--bdr);
+    border-radius: 3px;
+    padding: 18px;
+    margin-bottom: 12px;
+    animation: fadeIn 0.25s ease;
+  }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--acc);
+    margin-bottom: 14px;
+    padding-bottom: 11px;
+    border-bottom: 1px solid var(--bdr);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── Form elements ── */
+  .field { margin-bottom: 13px; }
+
+  label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--txt2);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+
+  input[type=text], input[type=url], textarea {
+    width: 100%;
+    background: var(--surf2);
+    border: 1px solid var(--bdr);
+    border-radius: 2px;
+    color: var(--txt);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 9px 11px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type=text]:focus, input[type=url]:focus, textarea:focus {
+    border-color: var(--acc);
+  }
+
+  textarea { resize: vertical; min-height: 58px; }
+
+  /* ── Drop zone ── */
+  .dropzone {
+    border: 1px dashed var(--bdr);
+    border-radius: 2px;
+    padding: 28px 16px;
+    text-align: center;
+    cursor: pointer;
+    background: var(--surf2);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .dropzone:hover, .dropzone.drag { border-color: var(--acc); background: #1a160c; }
+
+  .dz-icon { font-size: 24px; opacity: 0.35; margin-bottom: 7px; }
+  .dz-main { font-size: 13px; color: var(--txt2); margin-bottom: 3px; }
+  .dz-sub { font-family: var(--mono); font-size: 10px; color: var(--txt3); }
+
+  .file-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surf2);
+    border: 1px solid var(--bdr);
+    border-radius: 2px;
+    padding: 10px 12px;
+  }
+
+  .file-chip-icon { font-size: 18px; }
+  .file-chip-info { flex: 1; min-width: 0; }
+  .file-chip-name { font-family: var(--mono); font-size: 11px; color: var(--acc); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-chip-size { font-family: var(--mono); font-size: 10px; color: var(--txt3); margin-top: 1px; }
+
+  .btn-x {
+    background: none; border: none; color: var(--txt3);
+    cursor: pointer; font-size: 15px; padding: 3px; line-height: 1;
+    transition: color 0.2s;
+  }
+  .btn-x:hover { color: var(--red); }
+
+  .or-div {
+    display: flex; align-items: center; gap: 10px;
+    margin: 11px 0;
+    font-family: var(--mono); font-size: 10px; color: var(--txt3);
+  }
+  .or-div::before, .or-div::after { content:''; flex:1; border-top: 1px solid var(--bdr); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 18px; border-radius: 2px;
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    cursor: pointer; border: none; width: 100%;
+    transition: all 0.2s;
+  }
+
+  .btn-primary { background: var(--acc); color: #0a0a0a; }
+  .btn-primary:hover { background: #d4b87a; }
+  .btn-primary:disabled { background: var(--bdr); color: var(--txt3); cursor: not-allowed; }
+
+  .btn-green { background: var(--grn); color: #0a0a0a; }
+  .btn-green:hover { background: #8acc8a; }
+
+  .btn-ghost { background: var(--surf2); color: var(--txt2); border: 1px solid var(--bdr); }
+  .btn-ghost:hover { border-color: var(--acc); color: var(--acc); }
+
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+
+  /* ── Analysis display ── */
+  .analysis-block {
+    background: var(--surf2);
+    border: 1px solid var(--bdr);
+    border-radius: 2px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .a-row {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; padding: 5px 0;
+    border-bottom: 1px solid var(--bdr); gap: 12px;
+  }
+  .a-row:last-child { border-bottom: none; }
+
+  .a-key { font-family: var(--mono); font-size: 10px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0; padding-top: 1px; }
+  .a-val { font-family: var(--mono); font-size: 11px; color: var(--txt); text-align: right; word-break: break-word; }
+  .a-val.acc { color: var(--acc); font-weight: 600; }
+  .a-val.grn { color: var(--grn); font-size: 10px; }
+
+  .kv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 8px; margin-bottom: 12px; }
+  .kv-item { background: var(--surf); border: 1px solid var(--bdr); border-radius: 2px; padding: 7px 9px; }
+  .kv-key { font-family: var(--mono); font-size: 9px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+  .kv-val { font-family: var(--mono); font-size: 11px; color: var(--txt); }
+
+  /* ── Log ── */
+  .log-entry {
+    border-left: 2px solid var(--bdr);
+    padding: 5px 10px; margin-bottom: 5px;
+    font-family: var(--mono); font-size: 10px; color: var(--txt);
+    animation: fadeIn 0.2s ease;
+  }
+  .log-entry.ok { border-color: var(--grn); }
+  .log-entry.err { border-color: var(--red); color: var(--red); }
+  .log-entry.info { border-color: var(--acc); }
+
+  /* ── Spinner ── */
+  .spinner {
+    display: inline-block; width: 18px; height: 18px;
+    border: 2px solid var(--bdr); border-top-color: var(--acc);
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+
+  .spin-wrap { text-align: center; padding: 20px 0; }
+  .spin-msg { font-family: var(--mono); font-size: 11px; color: var(--txt2); margin-top: 10px; }
+
+  .prog-bar { height: 2px; background: var(--bdr); border-radius: 1px; overflow: hidden; margin-top: 10px; }
+  .prog-fill { height: 100%; background: var(--acc); border-radius: 1px; transition: width 0.4s ease; }
+
+  /* ── Success ── */
+  .success-wrap { text-align: center; padding: 18px; }
+  .success-icon { font-size: 34px; margin-bottom: 10px; }
+  .success-title { font-family: var(--mono); font-size: 13px; color: var(--grn); font-weight: 600; margin-bottom: 4px; }
+  .success-path { font-family: var(--mono); font-size: 10px; color: var(--txt2); word-break: break-all; }
+
+  /* ── Error box ── */
+  .err-box {
+    background: #150a0a; border: 1px solid #3a1a1a; border-radius: 2px;
+    padding: 9px 12px; font-family: var(--mono); font-size: 11px; color: var(--red);
+    margin-bottom: 12px; animation: fadeIn 0.2s ease;
+  }
+
+  /* ── Auth required ── */
+  #auth-required {
+    text-align: center; padding: 48px 20px;
+    font-family: var(--mono); color: var(--txt3);
+  }
+  #auth-required .ar-icon { font-size: 36px; margin-bottom: 16px; opacity: 0.4; }
+  #auth-required .ar-title { font-size: 13px; color: var(--txt2); margin-bottom: 8px; }
+  #auth-required .ar-sub { font-size: 11px; margin-bottom: 20px; }
+
+  .hidden { display: none !important; }
+
+  /* Confidence badge */
+  .conf-badge {
+    display: inline-block; padding: 1px 6px; border-radius: 1px;
+    font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: 0.05em;
+  }
+  .conf-high { background: #0f2010; color: var(--grn); border: 1px solid var(--grn-dim); }
+  .conf-medium { background: #1a1500; color: var(--acc); border: 1px solid var(--acc-dim); }
+  .conf-low { background: #150808; color: var(--red); border: 1px solid #5a2020; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="hdr">
+  <div class="logo">HDM <span>/ Hergott Document Manager</span></div>
+  <div class="hdr-right">
+    <div class="status-pill">
+      <div class="dot" id="dot"></div>
+      <span id="stat-txt">Not signed in</span>
+    </div>
+    <button id="auth-btn" onclick="toggleAuth()">Sign In</button>
+  </div>
+</div>
+
+<main>
+  <!-- Step bar -->
+  <div class="stepbar" id="stepbar">
+    <div class="step-seg active" id="s0"></div>
+    <div class="step-seg" id="s1"></div>
+    <div class="step-seg" id="s2"></div>
+    <div class="step-seg" id="s3"></div>
+  </div>
+
+  <!-- Auth required screen -->
+  <div id="auth-required">
+    <div class="ar-icon">🔐</div>
+    <div class="ar-title">Sign in to continue</div>
+    <div class="ar-sub">Connect your Microsoft work account to access OneDrive</div>
+    <button class="btn btn-primary" style="max-width:200px;margin:0 auto;" onclick="toggleAuth()">Sign In with Microsoft</button>
+  </div>
+
+  <!-- App panels (hidden until signed in) -->
+  <div id="app-panels" class="hidden">
+
+    <!-- Error box -->
+    <div class="err-box hidden" id="err-box"></div>
+
+    <!-- Panel 0: Input -->
+    <div class="card" id="p0">
+      <div class="card-title">01 — Document Input</div>
+
+      <div class="field">
+        <label>Upload PDF</label>
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="handleDrop(event)">
+          <div class="dz-icon">📄</div>
+          <div class="dz-main">Click to select a PDF</div>
+          <div class="dz-sub">or drag and drop</div>
+        </div>
+        <div class="file-chip hidden" id="file-chip">
+          <div class="file-chip-icon">📄</div>
+          <div class="file-chip-info">
+            <div class="file-chip-name" id="chip-name"></div>
+            <div class="file-chip-size" id="chip-size"></div>
+          </div>
+          <button class="btn-x" onclick="clearFile()">✕</button>
+        </div>
+        <input type="file" id="file-input" accept=".pdf" style="display:none" onchange="handleFileSelect(this)">
+      </div>
+
+      <div class="or-div">or</div>
+
+      <div class="field">
+        <label>OneDrive / SharePoint URL</label>
+        <input type="url" id="pdf-url" placeholder="https://..." oninput="checkReady()">
+      </div>
+
+      <div class="field">
+        <label>Notes (optional)</label>
+        <textarea id="notes" placeholder="Any context to help classify this document..."></textarea>
+      </div>
+
+      <button class="btn btn-primary" id="btn-analyse" onclick="runAnalysis()" disabled>
+        Analyse Document
+      </button>
+    </div>
+
+    <!-- Panel 1: Analysing -->
+    <div class="card hidden" id="p1">
+      <div class="card-title">02 — Analysing</div>
+      <div class="spin-wrap">
+        <div class="spinner"></div>
+        <div class="spin-msg" id="spin-msg">Preparing...</div>
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Confirm -->
+    <div class="card hidden" id="p2">
+      <div class="card-title">03 — Review & Confirm</div>
+      <div class="analysis-block" id="analysis-block"></div>
+      <div id="kv-section"></div>
+      <div id="notes-display"></div>
+
+      <div class="field">
+        <label>Override Filename</label>
+        <input type="text" id="ov-name" placeholder="Leave blank to use suggested">
+      </div>
+      <div class="field">
+        <label>Override Folder Path</label>
+        <input type="text" id="ov-path" placeholder="Leave blank to use suggested">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="resetApp()">Start Over</button>
+        <button class="btn btn-green" onclick="runSave()">Save to OneDrive</button>
+      </div>
+    </div>
+
+    <!-- Panel 3: Saving -->
+    <div class="card hidden" id="p3">
+      <div class="card-title">04 — Saving to OneDrive</div>
+      <div id="save-log"></div>
+    </div>
+
+    <!-- Panel 4: Done -->
+    <div class="card hidden" id="p4">
+      <div class="card-title">✓ Filed</div>
+      <div class="success-wrap">
+        <div class="success-icon">✓</div>
+        <div class="success-title">Document Filed Successfully</div>
+        <div class="success-path" id="done-path"></div>
+      </div>
+      <div id="done-log"></div>
+      <button class="btn btn-ghost" style="margin-top:12px" onclick="resetApp()">File Another Document</button>
+    </div>
+
+  </div><!-- /app-panels -->
+</main>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────────
+const CLIENT_ID = "fe6eb13e-8ea4-4eb4-9162-0c6cd68822a0";
+const TENANT_ID = "11435cd4-2fb6-4d2e-8298-2c2ad9694709";
+const ANTHROPIC_KEY = ""; // Set via prompt on first use
+const ROOT_FOLDER = "Hergott Document Manager";
+
+const SCOPES = ["Files.ReadWrite", "Sites.ReadWrite.All", "User.Read"];
+
+const TAXONOMY = {
+  "Personal": ["Tax Returns","Insurance","Legal - Wills - Estate","Vehicles","Medical","Personal Receipts - Expenses","Living Skies Music Festival"],
+  "Muran Holdings": ["Corporate Documents","Financial Statements","Tax Documents","Intercompany Transactions","Shareholder - Estate Documents","Contracts - Agreements","Bank Statements"],
+  "Chris Hergott Holdings": ["Corporate Documents","Financial Statements","Tax Documents","Intercompany Transactions","Shareholder - Estate Documents","Contracts - Agreements","Bank Statements"],
+  "C+C Hergott Holdings": ["Corporate Documents","Financial Statements","Tax Documents","Intercompany Transactions","Shareholder - Estate Documents","Contracts - Agreements","Bank Statements"],
+  "CTC Hergott Holdings": ["Corporate Documents","Financial Statements","Tax Documents","Intercompany Transactions","Shareholder - Estate Documents","Contracts - Agreements","Bank Statements","Permits - Approvals","Contractor Invoices","Legal - Title Documents","Subdivision - Lot Documents"],
+  "C&H Hergott Capital Inc": ["Corporate Documents","Financial Statements","Tax Documents","Intercompany Transactions","Shareholder - Estate Documents","Contracts - Agreements","Bank Statements"]
+};
+
+// ── MSAL setup ───────────────────────────────────────────────────────────────
+const msalConfig = {
+  auth: { clientId: CLIENT_ID, authority: `https://login.microsoftonline.com/${TENANT_ID}`, redirectUri: window.location.origin + window.location.pathname },
+  cache: { cacheLocation: "sessionStorage" }
+};
+
+const msal = new msal.PublicClientApplication(msalConfig);
+let account = null;
+let graphToken = null;
+let apiKey = localStorage.getItem("hdm_api_key") || "";
+
+// ── State ────────────────────────────────────────────────────────────────────
+let state = { file: null, b64: null, url: "", analysis: null };
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+async function initAuth() {
+  await msal.initialize();
+  const resp = await msal.handleRedirectPromise();
+  if (resp) { account = resp.account; }
+  else {
+    const accounts = msal.getAllAccounts();
+    if (accounts.length) account = accounts[0];
+  }
+  updateAuthUI();
+}
+
+async function toggleAuth() {
+  if (account) {
+    msal.logoutPopup(); account = null; graphToken = null; updateAuthUI();
+  } else {
+    try {
+      const resp = await msal.loginPopup({ scopes: SCOPES });
+      account = resp.account;
+      updateAuthUI();
+    } catch(e) { showError("Sign-in failed: " + e.message); }
+  }
+}
+
+async function getToken() {
+  if (!account) throw new Error("Not signed in");
+  try {
+    const resp = await msal.acquireTokenSilent({ scopes: SCOPES, account });
+    return resp.accessToken;
+  } catch {
+    const resp = await msal.acquireTokenPopup({ scopes: SCOPES, account });
+    return resp.accessToken;
+  }
+}
+
+function updateAuthUI() {
+  const btn = document.getElementById("auth-btn");
+  const dot = document.getElementById("dot");
+  const stat = document.getElementById("stat-txt");
+  const authReq = document.getElementById("auth-required");
+  const panels = document.getElementById("app-panels");
+
+  if (account) {
+    btn.textContent = "Sign Out";
+    btn.className = "signed-in";
+    dot.className = "dot ok";
+    stat.textContent = account.username;
+    authReq.classList.add("hidden");
+    panels.classList.remove("hidden");
+
+    if (!apiKey) promptApiKey();
+  } else {
+    btn.textContent = "Sign In";
+    btn.className = "";
+    dot.className = "dot";
+    stat.textContent = "Not signed in";
+    authReq.classList.remove("hidden");
+    panels.classList.add("hidden");
+  }
+}
+
+function promptApiKey() {
+  const key = prompt("Enter your Anthropic API key (stored locally in your browser):");
+  if (key && key.trim()) {
+    apiKey = key.trim();
+    localStorage.setItem("hdm_api_key", apiKey);
+  }
+}
+
+// ── File handling ─────────────────────────────────────────────────────────────
+function handleFileSelect(input) {
+  const f = input.files[0];
+  if (!f) return;
+  if (f.type !== "application/pdf") { showError("Please select a PDF file."); return; }
+  clearError();
+  state.file = f;
+  state.url = "";
+  document.getElementById("pdf-url").value = "";
+  document.getElementById("dropzone").classList.add("hidden");
+  document.getElementById("file-chip").classList.remove("hidden");
+  document.getElementById("chip-name").textContent = f.name;
+  document.getElementById("chip-size").textContent = (f.size / 1024).toFixed(1) + " KB";
+  checkReady();
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById("dropzone").classList.remove("drag");
+  const f = e.dataTransfer.files[0];
+  if (f) { document.getElementById("file-input").files = e.dataTransfer.files; handleFileSelect(document.getElementById("file-input")); }
+}
+
+function clearFile() {
+  state.file = null; state.b64 = null;
+  document.getElementById("file-input").value = "";
+  document.getElementById("dropzone").classList.remove("hidden");
+  document.getElementById("file-chip").classList.add("hidden");
+  checkReady();
+}
+
+function checkReady() {
+  const url = document.getElementById("pdf-url").value.trim();
+  state.url = url;
+  document.getElementById("btn-analyse").disabled = !(state.file || url);
+}
+
+// ── Panel management ──────────────────────────────────────────────────────────
+function showPanel(n) {
+  for (let i = 0; i <= 4; i++) {
+    const p = document.getElementById("p" + i);
+    if (p) p.classList.add("hidden");
+  }
+  document.getElementById("p" + n).classList.remove("hidden");
+
+  // Step bar
+  const segs = ["s0","s1","s2","s3"];
+  segs.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = "step-seg" + (i < n ? " done" : i === n ? " active" : "");
+  });
+}
+
+function setStatus(txt, type) {
+  document.getElementById("stat-txt").textContent = txt;
+  const dot = document.getElementById("dot");
+  dot.className = "dot" + (type ? " " + type : "");
+}
+
+function setProgress(pct, msg) {
+  document.getElementById("prog-fill").style.width = pct + "%";
+  if (msg) document.getElementById("spin-msg").textContent = msg;
+}
+
+function showError(msg) {
+  const box = document.getElementById("err-box");
+  box.textContent = msg;
+  box.classList.remove("hidden");
+}
+
+function clearError() {
+  document.getElementById("err-box").classList.add("hidden");
+}
+
+function addLog(containerId, msg, type) {
+  const c = document.getElementById(containerId);
+  const d = document.createElement("div");
+  d.className = "log-entry " + (type || "info");
+  d.textContent = msg;
+  c.appendChild(d);
+}
+
+// ── Analysis ──────────────────────────────────────────────────────────────────
+async function runAnalysis() {
+  clearError();
+  showPanel(1);
+  setStatus("Analysing", "busy");
+
+  try {
+    let b64 = null;
+    if (state.file) {
+      setProgress(15, "Reading file...");
+      b64 = await toBase64(state.file);
+      state.b64 = b64;
+    }
+
+    setProgress(35, "Sending to Claude...");
+
+    const content = [];
+    if (b64) {
+      content.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: b64 } });
+    } else {
+      content.push({ type: "text", text: `OneDrive URL provided: ${state.url}\nClassify based on URL structure. Set extraction fields to null where content unavailable.` });
+    }
+
+    const notes = document.getElementById("notes").value.trim();
+    if (notes) content.push({ type: "text", text: "User notes: " + notes });
+
+    content.push({
+      type: "text",
+      text: `Analyse this document. Respond ONLY with valid JSON — no markdown, no preamble, no explanation.
+
+Taxonomy: ${JSON.stringify(TAXONOMY)}
+Root folder: "${ROOT_FOLDER}"
+Today's date: ${new Date().toISOString().slice(0, 10)}
+
+Return exactly this structure:
+{
+  "entity": "<exact entity key from taxonomy>",
+  "subfolder": "<exact subfolder name for that entity>",
+  "docType": "<brief document type e.g. Invoice, Bank Statement, Corporate Resolution>",
+  "suggestedFilename": "<YYYY-MM-DD_EntityAbbrev_DocType_Reference.pdf>",
+  "onedrivePath": "${ROOT_FOLDER}/<entity>/<subfolder>",
+  "extracted": {
+    "date": "<document date or null>",
+    "vendor": "<vendor/payee/issuer or null>",
+    "amount": "<total amount with currency or null>",
+    "gst": "<GST/HST amount or null>",
+    "reference": "<invoice or document number or null>",
+    "description": "<one-line summary of what this document is>"
+  },
+  "confidence": "<high|medium|low>",
+  "notes": "<any caveats or empty string>"
+}`
+    });
+
+    setProgress(55, "Claude is reading...");
+
+    if (!apiKey) { promptApiKey(); if (!apiKey) throw new Error("API key required"); }
+
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content }] })
+    });
+
+    setProgress(80, "Parsing response...");
+
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const raw = (data.content || []).map(c => c.text || "").join("");
+    const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    state.analysis = parsed;
+
+    setProgress(100, "Done");
+    setTimeout(() => { renderConfirm(parsed); showPanel(2); setStatus(account.username, "ok"); }, 350);
+
+  } catch (e) {
+    showPanel(0);
+    setStatus("Error", "err");
+    showError("Analysis failed: " + e.message);
+  }
+}
+
+function toBase64(f) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(",")[1]);
+    r.onerror = rej;
+    r.readAsDataURL(f);
+  });
+}
+
+function renderConfirm(a) {
+  const conf = a.confidence || "medium";
+  const confClass = "conf-" + conf;
+
+  document.getElementById("analysis-block").innerHTML = `
+    <div class="a-row"><div class="a-key">Entity</div><div class="a-val acc">${a.entity}</div></div>
+    <div class="a-row"><div class="a-key">Type</div><div class="a-val">${a.docType}</div></div>
+    <div class="a-row"><div class="a-key">Filename</div><div class="a-val" style="font-size:10px">${a.suggestedFilename}</div></div>
+    <div class="a-row"><div class="a-key">Path</div><div class="a-val grn">${a.onedrivePath}</div></div>
+    <div class="a-row" style="border-bottom:none"><div class="a-key">Confidence</div><div class="a-val"><span class="conf-badge ${confClass}">${conf.toUpperCase()}</span></div></div>
+  `;
+
+  const ext = a.extracted || {};
+  const kvItems = Object.entries(ext).filter(([,v]) => v).map(([k,v]) =>
+    `<div class="kv-item"><div class="kv-key">${k}</div><div class="kv-val">${v}</div></div>`
+  ).join("");
+
+  document.getElementById("kv-section").innerHTML = kvItems
+    ? `<div style="font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px">Extracted Data</div><div class="kv-grid">${kvItems}</div>`
+    : "";
+
+  document.getElementById("notes-display").innerHTML = a.notes
+    ? `<div style="font-family:var(--mono);font-size:10px;color:var(--txt3);padding:7px 9px;background:var(--surf2);border-radius:2px;margin-bottom:10px">${a.notes}</div>`
+    : "";
+
+  document.getElementById("ov-name").value = "";
+  document.getElementById("ov-path").value = "";
+}
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+async function runSave() {
+  const a = state.analysis;
+  const filename = document.getElementById("ov-name").value.trim() || a.suggestedFilename;
+  const folderPath = document.getElementById("ov-path").value.trim() || a.onedrivePath;
+
+  showPanel(3);
+  setStatus("Saving...", "busy");
+  document.getElementById("save-log").innerHTML = "";
+
+  try {
+    const token = await getToken();
+
+    addLog("save-log", "Connected to Microsoft Graph", "ok");
+
+    // 1. Ensure root folder exists
+    addLog("save-log", `Creating folder: ${ROOT_FOLDER}`, "info");
+    const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
+    addLog("save-log", `✓ ${ROOT_FOLDER}`, "ok");
+
+    // 2. Create entity folder
+    const pathParts = folderPath.replace(ROOT_FOLDER + "/", "").split("/");
+    let parentId = rootId;
+    for (const part of pathParts) {
+      addLog("save-log", `Creating folder: ${part}`, "info");
+      parentId = await ensureFolder(token, parentId, part);
+      addLog("save-log", `✓ ${part}`, "ok");
+    }
+
+    // 3. Upload PDF if we have it
+    if (state.b64) {
+      addLog("save-log", `Uploading: ${filename}`, "info");
+      await uploadFile(token, parentId, filename, state.b64);
+      addLog("save-log", `✓ File uploaded`, "ok");
+    } else {
+      addLog("save-log", "No file to upload (URL mode — manual copy required)", "info");
+    }
+
+    // 4. Update document_log.json
+    addLog("save-log", "Updating document_log.json...", "info");
+    await updateJsonLog(token, rootId, a, filename, folderPath);
+    addLog("save-log", "✓ document_log.json updated", "ok");
+
+    // 5. Update document_log.xlsx (append row via Graph)
+    addLog("save-log", "Updating document_log.xlsx...", "info");
+    await updateExcelLog(token, rootId, a, filename, folderPath);
+    addLog("save-log", "✓ document_log.xlsx updated", "ok");
+
+    // Done
+    document.getElementById("done-path").textContent = folderPath + "/" + filename;
+    document.getElementById("done-log").innerHTML = document.getElementById("save-log").innerHTML;
+    showPanel(4);
+    setStatus("Filed", "ok");
+
+  } catch (e) {
+    setStatus("Error", "err");
+    addLog("save-log", "ERROR: " + e.message, "err");
+    addLog("save-log", "Manual path: " + folderPath + "/" + filename, "info");
+  }
+}
+
+// ── Graph API helpers ─────────────────────────────────────────────────────────
+const GRAPH = "https://graph.microsoft.com/v1.0";
+
+async function graphGet(token, path) {
+  const r = await fetch(GRAPH + path, { headers: { Authorization: "Bearer " + token } });
+  if (!r.ok) throw new Error("Graph GET failed: " + r.status + " " + path);
+  return r.json();
+}
+
+async function graphPost(token, path, body) {
+  const r = await fetch(GRAPH + path, {
+    method: "POST",
+    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { const t = await r.text(); throw new Error("Graph POST failed: " + r.status + " " + t); }
+  return r.json();
+}
+
+async function graphPatch(token, path, body) {
+  const r = await fetch(GRAPH + path, {
+    method: "PATCH",
+    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { const t = await r.text(); throw new Error("Graph PATCH failed: " + r.status + " " + t); }
+  return r.json();
+}
+
+async function ensureFolder(token, parentId, name) {
+  // Check if folder exists
+  const parentPath = parentId === "root" ? "/me/drive/root" : `/me/drive/items/${parentId}`;
+  try {
+    const check = await fetch(`${GRAPH}${parentPath.replace("/me/drive","/me/drive")}:/children?$filter=name eq '${encodeURIComponent(name)}' and folder ne null`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    const data = await check.json();
+    if (data.value && data.value.length > 0) return data.value[0].id;
+  } catch {}
+
+  // Create folder
+  const createPath = parentId === "root" ? "/me/drive/root/children" : `/me/drive/items/${parentId}/children`;
+  const result = await graphPost(token, createPath, {
+    name, folder: {}, "@microsoft.graph.conflictBehavior": "rename"
+  });
+  return result.id;
+}
+
+async function uploadFile(token, parentId, filename, b64) {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+  const r = await fetch(`${GRAPH}/me/drive/items/${parentId}:/${encodeURIComponent(filename)}:/content`, {
+    method: "PUT",
+    headers: { Authorization: "Bearer " + token, "Content-Type": "application/pdf" },
+    body: bytes
+  });
+  if (!r.ok) { const t = await r.text(); throw new Error("Upload failed: " + r.status + " " + t); }
+  return r.json();
+}
+
+async function updateJsonLog(token, rootFolderId, a, filename, folderPath) {
+  const logName = "document_log.json";
+  const entry = {
+    timestamp: new Date().toISOString(),
+    filename, path: folderPath,
+    entity: a.entity, docType: a.docType,
+    subfolder: a.subfolder, confidence: a.confidence,
+    extracted: a.extracted
+  };
+
+  // Try to read existing file
+  let existing = [];
+  try {
+    const r = await fetch(`${GRAPH}/me/drive/items/${rootFolderId}:/${logName}:/content`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    if (r.ok) existing = await r.json();
+  } catch {}
+
+  existing.push(entry);
+  const content = JSON.stringify(existing, null, 2);
+  const bytes = new TextEncoder().encode(content);
+
+  const r = await fetch(`${GRAPH}/me/drive/items/${rootFolderId}:/${logName}:/content`, {
+    method: "PUT",
+    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+    body: bytes
+  });
+  if (!r.ok) throw new Error("JSON log update failed: " + r.status);
+}
+
+async function updateExcelLog(token, rootFolderId, a, filename, folderPath) {
+  const xlsName = "document_log.xlsx";
+  const ext = a.extracted || {};
+
+  // Check if file exists
+  let fileId = null;
+  try {
+    const r = await fetch(`${GRAPH}/me/drive/items/${rootFolderId}:/${xlsName}`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    if (r.ok) { const d = await r.json(); fileId = d.id; }
+  } catch {}
+
+  if (!fileId) {
+    // Create a simple CSV instead as fallback (xlsx creation requires more complex handling)
+    const csvName = "document_log.csv";
+    const header = "Timestamp,Entity,DocType,Filename,Path,Date,Vendor,Amount,GST,Reference,Description\n";
+    const row = [
+      new Date().toISOString(), a.entity, a.docType, filename, folderPath,
+      ext.date||"", ext.vendor||"", ext.amount||"", ext.gst||"", ext.reference||"", ext.description||""
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(",") + "\n";
+
+    // Check if CSV exists
+    let csvContent = header;
+    try {
+      const cr = await fetch(`${GRAPH}/me/drive/items/${rootFolderId}:/${csvName}:/content`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+      if (cr.ok) { const existing = await cr.text(); csvContent = existing; }
+    } catch {}
+
+    const updated = csvContent + row;
+    const r = await fetch(`${GRAPH}/me/drive/items/${rootFolderId}:/${csvName}:/content`, {
+      method: "PUT",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "text/csv" },
+      body: new TextEncoder().encode(updated)
+    });
+    if (!r.ok) throw new Error("CSV log update failed: " + r.status);
+    return;
+  }
+
+  // If xlsx exists, append a row via Graph Excel API
+  try {
+    const row = [[
+      new Date().toISOString(), a.entity, a.docType, filename, folderPath,
+      ext.date||"", ext.vendor||"", ext.amount||"", ext.gst||"", ext.reference||"", ext.description||""
+    ]];
+    await graphPost(token, `/me/drive/items/${fileId}/workbook/tables('Table1')/rows/add`, { values: row });
+  } catch {
+    // Fall back to CSV if Excel API fails
+    await updateExcelLog(token, rootFolderId, a, filename, folderPath);
+  }
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────────
+function resetApp() {
+  state = { file: null, b64: null, url: "", analysis: null };
+  document.getElementById("file-input").value = "";
+  document.getElementById("pdf-url").value = "";
+  document.getElementById("notes").value = "";
+  document.getElementById("dropzone").classList.remove("hidden");
+  document.getElementById("file-chip").classList.add("hidden");
+  document.getElementById("btn-analyse").disabled = true;
+  clearError();
+  showPanel(0);
+  setStatus(account ? account.username : "Not signed in", account ? "ok" : "");
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+initAuth();
+</script>
+</body>
+</html>
