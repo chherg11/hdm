@@ -570,12 +570,12 @@ const msalConfig = {
   cache: { cacheLocation: "sessionStorage" }
 };
 
-// MSAL UMD bundle exports PublicClientApplication directly to globalThis
-if (typeof PublicClientApplication === 'undefined') { 
+// MSAL UMD bundle confirmed at window.msal
+if (!window.msal || !window.msal.PublicClientApplication) { 
   document.body.innerHTML = '<div style="color:#c06060;padding:40px;font-family:monospace;background:#0a0a0a;min-height:100vh">ERROR: MSAL failed to initialize.</div>'; 
   throw new Error("MSAL not loaded"); 
 }
-const msalInstance = new PublicClientApplication(msalConfig);
+const msalInstance = new window.msal.PublicClientApplication(msalConfig);
 let account = null;
 let graphToken = null;
 let apiKey = localStorage.getItem("hdm_api_key") || "";
