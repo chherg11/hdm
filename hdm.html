@@ -545,6 +545,15 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
   .srch-result-actions { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; flex-shrink: 0; }
   .srch-result-amount { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--txt); white-space: nowrap; }
 
+  /* OneDrive scan */
+  .scan-item { padding: 9px 0; border-bottom: 1px solid var(--bdr); display: flex; gap: 12px; align-items: center; }
+  .scan-item:last-child { border-bottom: none; }
+  .scan-item-body { flex: 1; min-width: 0; }
+  .scan-item-name { font-family: var(--mono); font-size: 10px; color: var(--acc); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .scan-item-path { font-family: var(--mono); font-size: 9px; color: var(--txt3); margin-top: 2px; }
+  .scan-badge-unprocessed { font-family: var(--mono); font-size: 9px; background: #100a00; color: var(--acc); border: 1px solid var(--acc-dim); border-radius: 1px; padding: 1px 6px; white-space: nowrap; }
+  .scan-badge-ok { font-family: var(--mono); font-size: 9px; background: #0f2010; color: var(--grn); border: 1px solid var(--grn-dim); border-radius: 1px; padding: 1px 6px; white-space: nowrap; }
+
   /* Interco */
   .ic-matrix-table { border-collapse: collapse; font-family: var(--mono); font-size: 10px; min-width: 100%; }
   .ic-matrix-table th { padding: 6px 10px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--txt3); border: 1px solid var(--bdr); background: var(--surf2); white-space: nowrap; }
@@ -934,6 +943,7 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
           style="flex:1;min-width:200px;background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:8px 10px;outline:none"
           oninput="runSearch()" onkeydown="if(event.key==='Enter')runSearch()">
         <button class="btn btn-green" style="padding:8px 14px;width:auto" onclick="runSearch()">Search</button>
+        <button class="btn btn-ghost" style="padding:8px 12px;width:auto;font-size:10px" onclick="scanOneDrive()" title="Scan OneDrive for unprocessed files">⊙ Scan OneDrive</button>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <select id="srch-entity" onchange="runSearch()" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:5px 8px">
@@ -957,6 +967,22 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
         <input type="number" id="srch-amt" onchange="runSearch()" placeholder="Amount..." title="Amount" style="width:110px;background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:5px 8px">
         <button class="btn btn-ghost" style="padding:5px 8px;width:auto;font-size:10px" onclick="clearSearch()">Clear</button>
       </div>
+    </div>
+    <div class="card" id="srch-recent-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="card-title" style="margin-bottom:0">Recently Filed</div>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--txt3)">10 most recent</span>
+      </div>
+      <div id="srch-recent-list"><div style="font-family:var(--mono);font-size:11px;color:var(--txt3);padding:12px 0">Loading...</div></div>
+    </div>
+
+    <div class="card hidden" id="srch-scan-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0">OneDrive Scan</div>
+        <button class="btn btn-ghost" style="padding:3px 8px;width:auto;font-size:9px" onclick="document.getElementById('srch-scan-card').classList.add('hidden');document.getElementById('srch-recent-card').classList.remove('hidden')">✕ Close</button>
+      </div>
+      <div id="srch-scan-summary" style="font-family:var(--mono);font-size:10px;color:var(--txt3);margin-bottom:12px"></div>
+      <div id="srch-scan-list"></div>
     </div>
     <div class="card" id="srch-results-card" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -4324,7 +4350,49 @@ let docLog = []; // document_log.json cache
 
 async function initSearch() {
   if (!docLog.length) await loadDocLog();
+  renderRecentDocs();
   document.getElementById("srch-q").focus();
+}
+
+function renderRecentDocs() {
+  const el = document.getElementById("srch-recent-list");
+  if (!docLog.length) {
+    el.innerHTML = `<div style="font-family:var(--mono);font-size:11px;color:var(--txt3);padding:12px 0">No documents filed yet.</div>`;
+    return;
+  }
+  const recent = [...docLog]
+    .sort((a, b) => (b.timestamp || "") > (a.timestamp || "") ? 1 : -1)
+    .slice(0, 10);
+
+  el.innerHTML = recent.map(doc => {
+    const ext = doc.extracted || {};
+    const amount = ext.amount ? `$${parseFloat(String(ext.amount).replace(/[^0-9.]/g,"")).toLocaleString("en-CA",{minimumFractionDigits:2})}` : "";
+    const gst = ext.gst ? `GST $${parseFloat(String(ext.gst).replace(/[^0-9.]/g,"")).toLocaleString("en-CA",{minimumFractionDigits:2})}` : "";
+    const docDate = ext.date || doc.timestamp?.slice(0,10) || "";
+    return `<div class="srch-result">
+      <div class="srch-result-icon">📄</div>
+      <div class="srch-result-body">
+        <div class="srch-result-filename">${doc.filename || "Unknown"}</div>
+        <div class="srch-result-path">${doc.path || ""}</div>
+        <div class="srch-result-meta">
+          ${docDate ? `<span class="srch-chip hi">${docDate}</span>` : ""}
+          ${doc.entity ? `<span class="srch-chip hi">${ENTITY_ABBREV[doc.entity]||doc.entity}</span>` : ""}
+          ${doc.subfolder ? `<span class="srch-chip">${doc.subfolder}</span>` : ""}
+          ${doc.docType ? `<span class="srch-chip">${doc.docType}</span>` : ""}
+          ${ext.vendor ? `<span class="srch-chip hi">${ext.vendor}</span>` : ""}
+          ${doc.confidence ? `<span class="srch-chip conf-badge conf-${doc.confidence}">${doc.confidence.toUpperCase()}</span>` : ""}
+        </div>
+      </div>
+      <div class="srch-result-actions">
+        ${amount ? `<div class="srch-result-amount">${amount}</div>` : ""}
+        ${gst ? `<div style="font-family:var(--mono);font-size:9px;color:var(--txt3)">${gst}</div>` : ""}
+        <button class="btn btn-ghost" style="padding:2px 8px;width:auto;font-size:9px;margin-top:4px"
+          onclick="copyPath('${(doc.path||"")+"/"+(doc.filename||"")}', this)">Copy Path</button>
+        <button class="btn btn-ghost" style="padding:2px 8px;width:auto;font-size:9px;color:var(--red)"
+          onclick="showDeleteDoc('${(doc.filename||'').replace(/'/g,"&#39;")}', '${(doc.path||'').replace(/'/g,"&#39;")}')">✕ Delete</button>
+      </div>
+    </div>`;
+  }).join("");
 }
 
 async function loadDocLog() {
@@ -4390,8 +4458,10 @@ function runSearch() {
   if (!hasFilter) {
     document.getElementById("srch-results-card").style.display = "none";
     document.getElementById("srch-empty").classList.add("hidden");
+    document.getElementById("srch-recent-card").style.display = "";
     return;
   }
+  document.getElementById("srch-recent-card").style.display = "none";
 
   let results = docLog.map(doc => ({ doc, score: scoreMatch(doc, q, amtFilter) }))
     .filter(r => r.score > 0);
@@ -4476,6 +4546,7 @@ function clearSearch() {
   });
   document.getElementById("srch-results-card").style.display = "none";
   document.getElementById("srch-empty").classList.add("hidden");
+  document.getElementById("srch-recent-card").style.display = "";
   document.getElementById("srch-q").focus();
 }
 
@@ -5380,13 +5451,159 @@ async function executeDeleteDocument() {
     }
 
     closeDeleteDoc();
-    runSearch(); // refresh search results
+    renderRecentDocs(); // refresh recent list
+    runSearch(); // refresh search results if active
 
   } catch(e) {
     errEl.textContent = "Delete failed: " + e.message;
     errEl.classList.remove("hidden");
     btn.disabled = false;
     btn.textContent = "Delete Permanently";
+  }
+}
+
+// ── OneDrive Scanner ──────────────────────────────────────────────────────────
+async function scanOneDrive() {
+  // Show scan card, hide recent
+  document.getElementById("srch-recent-card").classList.add("hidden");
+  document.getElementById("srch-scan-card").classList.remove("hidden");
+  document.getElementById("srch-scan-summary").textContent = "Scanning OneDrive...";
+  document.getElementById("srch-scan-list").innerHTML =
+    `<div style="font-family:var(--mono);font-size:10px;color:var(--txt3);padding:12px 0">Walking folder tree — this may take a moment...</div>`;
+
+  // Load document log for comparison
+  if (!docLog.length) await loadDocLog().catch(() => {});
+  const indexedFilenames = new Set(docLog.map(d => d.filename));
+
+  try {
+    const token = await getToken();
+    const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
+
+    // Recursively list all files in the HDM root folder
+    const allFiles = [];
+    await walkFolder(token, rootId, ROOT_FOLDER, allFiles);
+
+    // Separate into processed and unprocessed
+    const unprocessed = allFiles.filter(f => !indexedFilenames.has(f.name));
+    const processed   = allFiles.filter(f =>  indexedFilenames.has(f.name));
+
+    // Summary
+    document.getElementById("srch-scan-summary").innerHTML =
+      `<span style="color:var(--txt2)">${allFiles.length} files found in OneDrive</span> &nbsp;·&nbsp; ` +
+      `<span style="color:var(--grn)">${processed.length} indexed</span> &nbsp;·&nbsp; ` +
+      `<span style="color:${unprocessed.length ? "var(--acc)" : "var(--grn)"}">${unprocessed.length} unprocessed</span>`;
+
+    if (!allFiles.length) {
+      document.getElementById("srch-scan-list").innerHTML =
+        `<div style="font-family:var(--mono);font-size:10px;color:var(--txt3);padding:12px 0">No files found in the Hergott Document Manager folder.</div>`;
+      return;
+    }
+
+    if (!unprocessed.length) {
+      document.getElementById("srch-scan-list").innerHTML =
+        `<div style="font-family:var(--mono);font-size:10px;color:var(--grn);padding:12px 0">✓ All ${allFiles.length} files in OneDrive are indexed in the document log.</div>`;
+      return;
+    }
+
+    // Render unprocessed files
+    document.getElementById("srch-scan-list").innerHTML = `
+      <div style="font-family:var(--mono);font-size:9px;color:var(--acc);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr)">
+        ${unprocessed.length} file${unprocessed.length!==1?"s":""} not in document index
+      </div>
+      ${unprocessed.map(f => {
+        const sizeKB = f.size ? (f.size / 1024).toFixed(1) + " KB" : "—";
+        const modified = f.lastModifiedDateTime ? f.lastModifiedDateTime.slice(0, 10) : "";
+        return `<div class="scan-item">
+          <div class="scan-item-body">
+            <div class="scan-item-name">${f.name}</div>
+            <div class="scan-item-path">${f.parentPath}</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:2px">${sizeKB}${modified ? " · " + modified : ""}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">
+            <span class="scan-badge-unprocessed">Not indexed</span>
+            <button class="btn btn-ghost" style="padding:2px 8px;width:auto;font-size:9px"
+              onclick="processFromOneDrive('${f.id}', '${f.name.replace(/'/g,"&#39;")}', '${f.parentPath.replace(/'/g,"&#39;")}')">▶ Process</button>
+          </div>
+        </div>`;
+      }).join("")}
+      ${processed.length ? `
+      <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.06em;margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--bdr)">
+        ${processed.length} file${processed.length!==1?"s":""} already indexed ✓
+      </div>
+      ${processed.slice(0, 5).map(f => `<div class="scan-item">
+          <div class="scan-item-body">
+            <div class="scan-item-name" style="color:var(--txt2)">${f.name}</div>
+            <div class="scan-item-path">${f.parentPath}</div>
+          </div>
+          <span class="scan-badge-ok">Indexed</span>
+        </div>`).join("")}
+      ${processed.length > 5 ? `<div style="font-family:var(--mono);font-size:9px;color:var(--txt3);padding:8px 0">... and ${processed.length - 5} more</div>` : ""}` : ""}
+    `;
+
+  } catch(e) {
+    document.getElementById("srch-scan-summary").textContent = "Scan failed: " + e.message;
+    document.getElementById("srch-scan-list").innerHTML = "";
+  }
+}
+
+// Recursively walk OneDrive folder, collecting all PDF files
+async function walkFolder(token, folderId, folderPath, results) {
+  let url = `${GRAPH}/me/drive/items/${folderId}/children?$top=200&$select=id,name,size,file,folder,lastModifiedDateTime`;
+
+  while (url) {
+    const r = await fetch(url, { headers: { Authorization: "Bearer " + token } });
+    if (!r.ok) break;
+    const data = await r.json();
+
+    for (const item of (data.value || [])) {
+      if (item.folder) {
+        // Recurse into subfolders (skip the root folder name itself)
+        await walkFolder(token, item.id, folderPath + "/" + item.name, results);
+      } else if (item.file && /\.pdf$/i.test(item.name)) {
+        results.push({ ...item, parentPath: folderPath });
+      }
+    }
+
+    url = data["@odata.nextLink"] || null;
+  }
+}
+
+// Download a file from OneDrive and process it through analyseFile
+async function processFromOneDrive(fileId, filename, parentPath) {
+  if (!apiKey) { promptApiKey(); if (!apiKey) return; }
+
+  const btn = document.querySelector(`button[onclick*="${fileId}"]`);
+  if (btn) { btn.textContent = "Downloading..."; btn.disabled = true; }
+
+  try {
+    const token = await getToken();
+
+    // Download the file content from OneDrive
+    const r = await fetch(`${GRAPH}/me/drive/items/${fileId}/content`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    if (!r.ok) throw new Error("Download failed: " + r.status);
+
+    const blob = await r.blob();
+    const file = new File([blob], filename, { type: "application/pdf" });
+
+    // Switch to File tab with this file pre-loaded
+    const b64 = await toBase64(file);
+    if (btn) { btn.textContent = "Analysing..."; }
+
+    const analysis = await analyseFile(b64, "", filename);
+    state.files = [file];
+    state.analyses = [{ file, b64, analysis, status: "pending" }];
+    renderBatchReview();
+
+    // Switch to File tab and show review panel
+    switchTab("file");
+    showPanel(2);
+    setStatus(account.username, "ok");
+
+  } catch(e) {
+    if (btn) { btn.textContent = "▶ Process"; btn.disabled = false; }
+    alert("Failed to process: " + e.message);
   }
 }
 
