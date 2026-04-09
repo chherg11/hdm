@@ -965,20 +965,28 @@ async function graphPatch(token, path, body) {
 }
 
 async function ensureFolder(token, parentId, name) {
-  // Check if folder exists
-  const parentPath = parentId === "root" ? "/me/drive/root" : `/me/drive/items/${parentId}`;
+  // Try to get folder by path — returns 404 if not found
+  const checkPath = parentId === "root"
+    ? `/me/drive/root:/${encodeURIComponent(name)}`
+    : `/me/drive/items/${parentId}:/${encodeURIComponent(name)}`;
+
   try {
-    const check = await fetch(`${GRAPH}${parentPath.replace("/me/drive","/me/drive")}:/children?$filter=name eq '${encodeURIComponent(name)}' and folder ne null`, {
+    const r = await fetch(`${GRAPH}${checkPath}`, {
       headers: { Authorization: "Bearer " + token }
     });
-    const data = await check.json();
-    if (data.value && data.value.length > 0) return data.value[0].id;
+    if (r.ok) {
+      const d = await r.json();
+      if (d.folder) return d.id; // exists, return its id
+    }
   } catch {}
 
-  // Create folder
-  const createPath = parentId === "root" ? "/me/drive/root/children" : `/me/drive/items/${parentId}/children`;
+  // Doesn't exist — create it
+  const createPath = parentId === "root"
+    ? "/me/drive/root/children"
+    : `/me/drive/items/${parentId}/children`;
+
   const result = await graphPost(token, createPath, {
-    name, folder: {}, "@microsoft.graph.conflictBehavior": "rename"
+    name, folder: {}, "@microsoft.graph.conflictBehavior": "fail"
   });
   return result.id;
 }
