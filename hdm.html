@@ -1870,6 +1870,31 @@ let account = null;
 let graphToken = null;
 let apiKey = localStorage.getItem("hdm_api_key") || "";
 
+// ── Anthropic API wrapper ─────────────────────────────────────────────────────
+async function anthropicFetch(params) {
+  if (!apiKey) { promptApiKey(); if (!apiKey) throw new Error("No API key set."); }
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-allow-browser": "true"
+    },
+    body: JSON.stringify(params)
+  });
+  if (!response.ok) {
+    const errText = await response.text();
+    if (response.status === 401) {
+      localStorage.removeItem("hdm_api_key");
+      apiKey = "";
+      throw new Error("Invalid API key (401). Re-enter your Anthropic API key.");
+    }
+    throw new Error("Anthropic API " + response.status + ": " + errText.slice(0, 200));
+  }
+  return response.json();
+}
+
 // ── State ────────────────────────────────────────────────────────────────────
 let state = { files: [], analyses: [] };
 
