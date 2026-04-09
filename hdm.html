@@ -995,6 +995,22 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
     <div id="loans-list"></div>
   </div>
 
+  <!-- Document delete confirmation modal -->
+  <div id="delete-doc-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1010;display:flex;align-items:center;justify-content:center">
+    <div style="background:var(--surf);border:1px solid var(--red);border-radius:4px;padding:24px;width:100%;max-width:460px">
+      <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--red);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px">Delete Document</div>
+      <div id="del-doc-filename" style="font-family:var(--mono);font-size:11px;color:var(--acc);margin-bottom:6px;word-break:break-all"></div>
+      <div id="del-doc-path" style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-bottom:16px;word-break:break-all"></div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--txt3);margin-bottom:12px">The following will be permanently deleted:</div>
+      <div id="del-doc-impacts" style="margin-bottom:16px"></div>
+      <div id="del-doc-error" class="hidden" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-bottom:10px"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="closeDeleteDoc()">Cancel</button>
+        <button class="btn" id="del-doc-confirm-btn" style="background:#3a0808;border:1px solid var(--red);color:var(--red)" onclick="executeDeleteDocument()">Delete Permanently</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Loan add/edit modal -->
   <div id="loan-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1001;display:flex;align-items:center;justify-content:center">
     <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:4px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto">
@@ -2376,13 +2392,23 @@ function renderLedger() {
     const typeCls = r.transactionType === "expense" ? "type-exp" : r.transactionType === "income" ? "type-inc" : "type-oth";
     const amt = r.amount != null ? `$${r.amount.toLocaleString("en-CA", {minimumFractionDigits:2})}` : "—";
     const gst = r.gst != null ? `$${r.gst.toLocaleString("en-CA", {minimumFractionDigits:2})}` : "—";
-    const manualBadge = r.manual ? `<span style="font-size:8px;background:var(--surf3);color:var(--txt3);border:1px solid var(--bdr);border-radius:1px;padding:1px 4px;margin-left:4px">MANUAL</span>` : "";
-    const deleteBtn = r.manual ? `<span style="color:var(--txt3);font-size:10px;cursor:pointer;padding:0 4px" onclick="deleteManualEntry('${r.id}')" title="Delete">✕</span>` : "";
+    // Show ORPHAN badge if auto-reconciled but its parent statement has been deleted
+    const isOrphan = r.autoReconciled && r.bankRef &&
+      !bankStatements.find(s => s.id === r.bankRef.stmtId);
+    const manualBadge = r.manual
+      ? `<span style="font-size:8px;background:var(--surf3);color:var(--txt3);border:1px solid var(--bdr);border-radius:1px;padding:1px 4px;margin-left:4px">MANUAL</span>`
+      : "";
+    const orphanBadge = isOrphan
+      ? `<span style="font-size:8px;background:#100a00;color:var(--acc);border:1px solid var(--acc-dim);border-radius:1px;padding:1px 4px;margin-left:4px" title="Parent bank statement was deleted">ORPHAN</span>`
+      : "";
+    const deleteBtn = (r.manual || isOrphan)
+      ? `<span style="color:var(--txt3);font-size:10px;cursor:pointer;padding:0 4px" onclick="deleteManualEntry('${r.id}')" title="Delete">✕</span>`
+      : "";
     return `<tr>
       <td>${r.date || "—"}</td>
       <td><span class="entity-tag">${(r.entity || "").split(" ").map(w => w[0]).join("")}</span></td>
       <td>${r.vendor || "—"}</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.description || ""}">${r.description || r.docType}${manualBadge}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.description || ""}">${r.description || r.docType}${manualBadge}${orphanBadge}</td>
       <td><span class="type-badge ${typeCls}">${r.transactionType}</span></td>
       <td>${gst}</td>
       <td class="amount-col">${amt}</td>
@@ -4431,7 +4457,9 @@ function runSearch() {
         ${amount ? `<div class="srch-result-amount">${amount}</div>` : ""}
         ${gst ? `<div style="font-family:var(--mono);font-size:9px;color:var(--txt3)">${gst}</div>` : ""}
         <button class="btn btn-ghost" style="padding:2px 8px;width:auto;font-size:9px;margin-top:4px"
-          onclick="copyPath('${(doc.path || "") + "/" + (doc.filename || "")}')">Copy Path</button>
+          onclick="copyPath('${(doc.path || "") + "/" + (doc.filename || "")}', this)">Copy Path</button>
+        <button class="btn btn-ghost" style="padding:2px 8px;width:auto;font-size:9px;color:var(--red)"
+          onclick="showDeleteDoc('${(doc.filename||'').replace(/'/g,'&#39;')}', '${(doc.path||'').replace(/'/g,'&#39;')}')">✕ Delete</button>
       </div>
     </div>`;
   }).join("");
@@ -5185,6 +5213,180 @@ function renderDashboard() {
           ${d.extracted?.amount ? ` · $${parseFloat(String(d.extracted.amount).replace(/[^0-9.]/g,"")).toLocaleString("en-CA",{minimumFractionDigits:2})}` : ""}
         </div>
       </div>`).join("");
+  }
+}
+
+// ── Document Delete ───────────────────────────────────────────────────────────
+let deleteDocTarget = null; // { filename, path }
+
+async function showDeleteDoc(filename, path) {
+  deleteDocTarget = { filename, path };
+  document.getElementById("del-doc-filename").textContent = filename;
+  document.getElementById("del-doc-path").textContent = path;
+  document.getElementById("del-doc-error").classList.add("hidden");
+  document.getElementById("del-doc-confirm-btn").disabled = false;
+  document.getElementById("del-doc-confirm-btn").textContent = "Delete Permanently";
+
+  // Show what will be affected
+  if (!docLog.length) await loadDocLog();
+  if (!ledgerData.length) await loadLedger().catch(() => {});
+  if (!bankStatements.length) await loadBankStatements().catch(() => {});
+  if (!alertsData.length) await loadAlerts().catch(() => {});
+
+  const impacts = [];
+  impacts.push({ icon: "📄", label: "PDF file deleted from OneDrive", colour: "var(--red)" });
+
+  const logEntry = docLog.find(d => d.filename === filename);
+  if (logEntry) impacts.push({ icon: "📋", label: "Removed from document index (document_log.json)", colour: "var(--acc)" });
+
+  const ledgerEntries = ledgerData.filter(e => e.filename === filename);
+  if (ledgerEntries.length) impacts.push({ icon: "📒", label: `${ledgerEntries.length} ledger entr${ledgerEntries.length === 1 ? "y" : "ies"} removed`, colour: "var(--acc)" });
+
+  const bankEntry = bankStatements.find(s => s.filename === filename);
+  if (bankEntry) impacts.push({ icon: "🏛", label: `Bank statement removed (${(bankEntry.transactions||[]).length} transactions)`, colour: "var(--acc)" });
+
+  const alertEntry = alertsData.find(a => a.filename === filename);
+  if (alertEntry) impacts.push({ icon: "🔔", label: `Alert removed: ${alertEntry.name}`, colour: "var(--acc)" });
+
+  // Warn about manual ledger entries linked via bankRef that will NOT be deleted
+  let warningHTML = "";
+  if (bankEntry) {
+    const stmtId = bankEntry.id;
+    const manualLinked = ledgerData.filter(e =>
+      e.manual &&
+      e.bankRef &&
+      (e.bankRef.stmtId === stmtId || e.bankRef.stmtId === filename)
+    );
+    if (manualLinked.length) {
+      warningHTML = `<div style="margin-top:12px;padding:10px 12px;background:#100a00;border:1px solid var(--acc);border-radius:2px">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--acc);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px">⚠ Not deleted — requires manual cleanup</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--txt2);line-height:1.5">
+          ${manualLinked.length} ledger entr${manualLinked.length === 1 ? "y was" : "ies were"} manually created when reconciling this statement.
+          These are linked by bank reference, not filename, and will remain in your ledger.
+        </div>
+        <div style="margin-top:8px;display:flex;flex-direction:column;gap:3px">
+          ${manualLinked.slice(0, 5).map(e =>
+            `<div style="font-family:var(--mono);font-size:9px;color:var(--txt3)">${e.date || "—"} · ${e.description || e.docType || ""} · $${(e.amount||0).toLocaleString("en-CA",{minimumFractionDigits:2})}</div>`
+          ).join("")}
+          ${manualLinked.length > 5 ? `<div style="font-family:var(--mono);font-size:9px;color:var(--txt3)">... and ${manualLinked.length - 5} more</div>` : ""}
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--acc);margin-top:6px">To remove these, go to the Ledger tab and delete them manually after this deletion.</div>
+      </div>`;
+    }
+  }
+
+  document.getElementById("del-doc-impacts").innerHTML = impacts.map(i =>
+    `<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr)">
+      <span>${i.icon}</span>
+      <span style="font-family:var(--mono);font-size:10px;color:${i.colour}">${i.label}</span>
+    </div>`
+  ).join("") + warningHTML;
+
+  document.getElementById("delete-doc-modal").classList.remove("hidden");
+  document.getElementById("delete-doc-modal").style.display = "flex";
+}
+
+function closeDeleteDoc() {
+  document.getElementById("delete-doc-modal").classList.add("hidden");
+  document.getElementById("delete-doc-modal").style.display = "none";
+  deleteDocTarget = null;
+}
+
+async function executeDeleteDocument() {
+  if (!deleteDocTarget) return;
+  const { filename, path } = deleteDocTarget;
+
+  const btn = document.getElementById("del-doc-confirm-btn");
+  const errEl = document.getElementById("del-doc-error");
+  btn.disabled = true;
+  btn.textContent = "Deleting...";
+  errEl.classList.add("hidden");
+
+  try {
+    const token = await getToken();
+    const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
+
+    // 1. Delete the PDF from OneDrive
+    const filePath = path + "/" + filename;
+    const fileResp = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${filePath.replace(ROOT_FOLDER + "/", "")}`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    if (fileResp.ok) {
+      const fileData = await fileResp.json();
+      await fetch(`${GRAPH}/me/drive/items/${fileData.id}`, {
+        method: "DELETE",
+        headers: { Authorization: "Bearer " + token }
+      });
+    }
+
+    // 2. Remove from document_log.json
+    const newDocLog = docLog.filter(d => d.filename !== filename);
+    if (newDocLog.length !== docLog.length) {
+      const bytes = new TextEncoder().encode(JSON.stringify(newDocLog, null, 2));
+      await fetch(`${GRAPH}/me/drive/items/${rootId}:/document_log.json:/content`, {
+        method: "PUT",
+        headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+        body: bytes
+      });
+      docLog.length = 0;
+      newDocLog.forEach(d => docLog.push(d));
+    }
+
+    // 3. Remove from ledger
+    const newLedger = ledgerData.filter(e => e.filename !== filename);
+    if (newLedger.length !== ledgerData.length) {
+      const bytes = new TextEncoder().encode(JSON.stringify(newLedger, null, 2));
+      await fetch(`${GRAPH}/me/drive/items/${rootId}:/${LEDGER_FILE}:/content`, {
+        method: "PUT",
+        headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+        body: bytes
+      });
+      ledgerData.length = 0;
+      newLedger.forEach(e => ledgerData.push(e));
+    }
+
+    // 4. Remove from bank statements
+    const newBank = bankStatements.filter(s => s.filename !== filename);
+    if (newBank.length !== bankStatements.length) {
+      const bytes = new TextEncoder().encode(JSON.stringify(newBank, null, 2));
+      await fetch(`${GRAPH}/me/drive/items/${rootId}:/${BANK_STMT_FILE}:/content`, {
+        method: "PUT",
+        headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+        body: bytes
+      });
+      bankStatements.length = 0;
+      newBank.forEach(s => bankStatements.push(s));
+    }
+
+    // 5. Remove from financial statements
+    const newFS = financialsData.filter(f => f.filename !== filename);
+    if (newFS.length !== financialsData.length) {
+      const bytes = new TextEncoder().encode(JSON.stringify(newFS, null, 2));
+      await fetch(`${GRAPH}/me/drive/items/${rootId}:/${FS_FILE}:/content`, {
+        method: "PUT",
+        headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+        body: bytes
+      });
+      financialsData.length = 0;
+      newFS.forEach(f => financialsData.push(f));
+    }
+
+    // 6. Remove from alerts
+    const newAlerts = alertsData.filter(a => a.filename !== filename);
+    if (newAlerts.length !== alertsData.length) {
+      alertsData.length = 0;
+      newAlerts.forEach(a => alertsData.push(a));
+      await persistAlerts();
+    }
+
+    closeDeleteDoc();
+    runSearch(); // refresh search results
+
+  } catch(e) {
+    errEl.textContent = "Delete failed: " + e.message;
+    errEl.classList.remove("hidden");
+    btn.disabled = false;
+    btn.textContent = "Delete Permanently";
   }
 }
 
