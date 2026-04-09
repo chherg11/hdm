@@ -404,6 +404,44 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
 
   .hidden { display: none !important; }
 
+  /* Nav tabs */
+  .nav-tabs { display: flex; gap: 2px; }
+  .nav-tab {
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 2px; border: 1px solid var(--bdr);
+    background: var(--surf2); color: var(--txt3); cursor: pointer; transition: all 0.2s;
+  }
+  .nav-tab:hover { color: var(--txt2); }
+  .nav-tab.active { background: var(--acc); color: #0a0a0a; border-color: var(--acc); }
+
+  /* Ledger */
+  .ledger-filters { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .ledger-filters select, .ledger-filters input {
+    background: var(--surf2); border: 1px solid var(--bdr); border-radius: 2px;
+    color: var(--txt); font-family: var(--mono); font-size: 11px; padding: 6px 9px; outline: none;
+  }
+  .ledger-filters select:focus, .ledger-filters input:focus { border-color: var(--acc); }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px; margin-bottom: 14px; }
+  .summary-card { background: var(--surf2); border: 1px solid var(--bdr); border-radius: 2px; padding: 10px 12px; }
+  .summary-label { font-family: var(--mono); font-size: 9px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .summary-value { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--txt); }
+  .summary-value.pos { color: var(--grn); }
+  .summary-value.neg { color: var(--red); }
+  .summary-value.acc { color: var(--acc); }
+
+  .ledger-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 10px; }
+  .ledger-table th { color: var(--txt3); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--bdr); text-align: left; }
+  .ledger-table td { padding: 7px 8px; border-bottom: 1px solid #1a1a1a; color: var(--txt); vertical-align: top; }
+  .ledger-table tr:hover td { background: var(--surf2); }
+  .ledger-table .amount-col { text-align: right; color: var(--grn); }
+  .ledger-table .entity-tag { display: inline-block; padding: 1px 5px; border-radius: 1px; background: var(--surf3); color: var(--acc); font-size: 9px; }
+  .type-badge { display: inline-block; padding: 1px 5px; border-radius: 1px; font-size: 9px; }
+  .type-exp { background: #150808; color: var(--red); border: 1px solid #3a1010; }
+  .type-inc { background: #0a1a0a; color: var(--grn); border: 1px solid #1a3a1a; }
+  .type-oth { background: var(--surf3); color: var(--txt3); border: 1px solid var(--bdr); }
+
   /* Confidence badge */
   .conf-badge {
     display: inline-block; padding: 1px 6px; border-radius: 1px;
@@ -420,6 +458,10 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
 <div id="hdr">
   <div class="logo">HDM <span>/ Hergott Document Manager</span></div>
   <div class="hdr-right">
+    <div class="nav-tabs" id="nav-tabs" style="display:none">
+      <button class="nav-tab active" id="tab-file" onclick="switchTab('file')">File</button>
+      <button class="nav-tab" id="tab-ledger" onclick="switchTab('ledger')">Ledger</button>
+    </div>
     <div class="status-pill">
       <div class="dot" id="dot"></div>
       <span id="stat-txt">Not signed in</span>
@@ -515,6 +557,45 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
     </div>
 
   </div><!-- /app-panels -->
+
+  <!-- Ledger panel -->
+  <div id="ledger-panel" class="hidden">
+    <div class="card">
+      <div class="card-title">Ledger — Summary</div>
+      <div class="ledger-filters">
+        <select id="lf-entity" onchange="renderLedger()">
+          <option value="">All Entities</option>
+          <option>Personal</option>
+          <option>Muran Holdings</option>
+          <option>Chris Hergott Holdings</option>
+          <option>C+C Hergott Holdings</option>
+          <option>CTC Hergott Holdings</option>
+          <option>C&amp;H Hergott Capital Inc</option>
+        </select>
+        <input type="text" id="lf-year" placeholder="Year e.g. 2025" style="width:120px" oninput="renderLedger()">
+        <select id="lf-type" onchange="renderLedger()">
+          <option value="">All Types</option>
+          <option value="expense">Expense</option>
+          <option value="income">Income</option>
+          <option value="other">Other</option>
+        </select>
+        <button class="btn btn-ghost" style="padding:5px 10px;width:auto" onclick="loadLedger()">↻ Refresh</button>
+      </div>
+      <div class="summary-grid" id="ledger-summary"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Transactions</div>
+      <div id="ledger-table-wrap" style="overflow-x:auto">
+        <table class="ledger-table">
+          <thead><tr>
+            <th>Date</th><th>Entity</th><th>Vendor</th><th>Description</th><th>Type</th><th>GST</th><th class="amount-col">Amount</th>
+          </tr></thead>
+          <tbody id="ledger-tbody"></tbody>
+        </table>
+        <div id="ledger-empty" class="hidden" style="text-align:center;padding:24px;font-family:var(--mono);font-size:11px;color:var(--txt3)">No transactions found</div>
+      </div>
+    </div>
+  </div>
 </main>
 
 <script>
@@ -613,6 +694,7 @@ function updateAuthUI() {
     stat.textContent = account.username;
     authReq.classList.add("hidden");
     panels.classList.remove("hidden");
+    document.getElementById("nav-tabs").style.display = "flex";
 
     if (!apiKey) promptApiKey();
   } else {
@@ -622,6 +704,8 @@ function updateAuthUI() {
     stat.textContent = "Not signed in";
     authReq.classList.remove("hidden");
     panels.classList.add("hidden");
+    document.getElementById("ledger-panel").classList.add("hidden");
+    document.getElementById("nav-tabs").style.display = "none";
   }
 }
 
@@ -747,7 +831,7 @@ async function runAnalysis() {
 
     try {
       const b64 = await toBase64(f);
-      const analysis = await analyseFile(b64, notes);
+      const analysis = await analyseFile(b64, notes, f.name);
       state.analyses.push({ file: f, b64, analysis, status: "pending" });
       updateBatchProgress(i, f.name, "ok", analysis.suggestedFilename);
     } catch(e) {
@@ -777,7 +861,7 @@ function updateBatchProgress(i, name, type, detail) {
   }
 }
 
-async function analyseFile(b64, notes) {
+async function analyseFile(b64, notes, originalFilename) {
   const content = [
     { type: "document", source: { type: "base64", media_type: "application/pdf", data: b64 } }
   ];
@@ -785,6 +869,8 @@ async function analyseFile(b64, notes) {
   content.push({
     type: "text",
     text: `Analyse this document. Respond ONLY with valid JSON — no markdown, no preamble, no explanation.
+
+Original filename: "${originalFilename}" — treat this as a STRONG signal for entity identification. If the filename contains an entity abbreviation (e.g. CHHL, MH, CTC, CCHH, CHHCI, PERS), use that to confirm the entity.
 
 Taxonomy: ${JSON.stringify(TAXONOMY)}
 Root folder: "${ROOT_FOLDER}"
@@ -801,6 +887,11 @@ Entity abbreviations for filenames:
 For suggestedFilename: use YYYY-MM-DD_EntityAbbrev_VendorShortName_DocType_Reference.pdf
 VendorShortName = short version of vendor/payee name, no spaces, hyphens if needed. Omit if no vendor.
 
+Classify the transaction type:
+- "expense" for invoices, bills, payments made, purchases
+- "income" for payments received, revenue, deposits into accounts
+- "other" for bank statements, corporate docs, legal, tax returns
+
 Return exactly this structure:
 {
   "entity": "<exact entity key from taxonomy>",
@@ -808,11 +899,13 @@ Return exactly this structure:
   "docType": "<brief document type>",
   "suggestedFilename": "<YYYY-MM-DD_EntityAbbrev_Vendor_DocType_Reference.pdf>",
   "onedrivePath": "${ROOT_FOLDER}/<entity>/<subfolder>",
+  "transactionType": "<expense|income|other>",
   "extracted": {
     "date": "<document date or null>",
     "vendor": "<vendor/payee/issuer or null>",
-    "amount": "<total amount with currency or null>",
-    "gst": "<GST/HST amount or null>",
+    "amount": "<total amount as plain number string e.g. 1234.56 or null>",
+    "currency": "<CAD or USD or null>",
+    "gst": "<GST/HST amount as plain number string or null>",
     "reference": "<invoice or document number or null>",
     "description": "<one-line summary>"
   },
@@ -867,54 +960,58 @@ function renderBatchReview() {
 
 // ── Save ──────────────────────────────────────────────────────────────────────
 async function runSave() {
-  const a = state.analysis;
-  const filename = document.getElementById("ov-name").value.trim() || a.suggestedFilename;
-  const folderPath = document.getElementById("ov-path").value.trim() || a.onedrivePath;
-
   showPanel(3);
   setStatus("Saving...", "busy");
   document.getElementById("save-log").innerHTML = "";
 
   try {
     const token = await getToken();
-
     addLog("save-log", "Connected to Microsoft Graph", "ok");
 
-    // 1. Ensure root folder exists
-    addLog("save-log", `Creating folder: ${ROOT_FOLDER}`, "info");
     const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
     addLog("save-log", `✓ ${ROOT_FOLDER}`, "ok");
 
-    // 2. Create entity folder
-    const pathParts = folderPath.replace(ROOT_FOLDER + "/", "").split("/");
-    let parentId = rootId;
-    for (const part of pathParts) {
-      addLog("save-log", `Creating folder: ${part}`, "info");
-      parentId = await ensureFolder(token, parentId, part);
-      addLog("save-log", `✓ ${part}`, "ok");
+    let successCount = 0;
+    const donePaths = [];
+
+    for (let i = 0; i < state.analyses.length; i++) {
+      const item = state.analyses[i];
+      if (item.status === "error" || !item.analysis) {
+        addLog("save-log", `✗ Skipped: ${item.file.name}`, "err");
+        continue;
+      }
+      const a = item.analysis;
+      const fnInput = document.getElementById("fn-" + i);
+      const filename = (fnInput && fnInput.value.trim()) || a.suggestedFilename;
+      const folderPath = a.onedrivePath;
+
+      addLog("save-log", `Filing: ${filename}`, "info");
+      try {
+        const pathParts = folderPath.replace(ROOT_FOLDER + "/", "").split("/");
+        let parentId = rootId;
+        for (const part of pathParts) {
+          parentId = await ensureFolder(token, parentId, part);
+        }
+        await uploadFile(token, parentId, filename, item.b64);
+        addLog("save-log", `✓ ${filename}`, "ok");
+        await updateJsonLog(token, rootId, a, filename, folderPath);
+        await updateExcelLog(token, rootId, a, filename, folderPath);
+        await updateLedger(token, rootId, a, filename);
+        donePaths.push(folderPath + "/" + filename);
+        successCount++;
+        item.status = "done";
+      } catch(e) {
+        addLog("save-log", `✗ ${filename}: ${e.message}`, "err");
+      }
     }
 
-    // 3. Upload PDF if we have it
-    if (state.b64) {
-      addLog("save-log", `Uploading: ${filename}`, "info");
-      await uploadFile(token, parentId, filename, state.b64);
-      addLog("save-log", `✓ File uploaded`, "ok");
-    } else {
-      addLog("save-log", "No file to upload (URL mode — manual copy required)", "info");
-    }
-
-    // 4. Update document_log.json
-    addLog("save-log", "Updating document_log.json...", "info");
-    await updateJsonLog(token, rootId, a, filename, folderPath);
-    addLog("save-log", "✓ document_log.json updated", "ok");
-
-    // 5. Update document_log.xlsx (append row via Graph)
-    addLog("save-log", "Updating document_log.xlsx...", "info");
-    await updateExcelLog(token, rootId, a, filename, folderPath);
-    addLog("save-log", "✓ document_log.xlsx updated", "ok");
-
-    // Done
-    document.getElementById("done-path").textContent = folderPath + "/" + filename;
+    const total = state.analyses.filter(x => x.status !== "error").length;
+    document.getElementById("done-summary").innerHTML = `
+      <div class="success-wrap">
+        <div class="success-icon">${successCount === total ? "✓" : "⚠"}</div>
+        <div class="success-title">${successCount} of ${total} document${total !== 1 ? "s" : ""} filed</div>
+        ${donePaths.map(p => `<div class="success-path">${p}</div>`).join("")}
+      </div>`;
     document.getElementById("done-log").innerHTML = document.getElementById("save-log").innerHTML;
     showPanel(4);
     setStatus("Filed", "ok");
@@ -922,7 +1019,6 @@ async function runSave() {
   } catch (e) {
     setStatus("Error", "err");
     addLog("save-log", "ERROR: " + e.message, "err");
-    addLog("save-log", "Manual path: " + folderPath + "/" + filename, "info");
   }
 }
 
@@ -1081,11 +1177,131 @@ async function updateExcelLog(token, rootFolderId, a, filename, folderPath) {
   }
 }
 
+// ── Ledger ────────────────────────────────────────────────────────────────────
+const LEDGER_FILE = "accounting_ledger.json";
+let ledgerData = [];
+
+async function updateLedger(token, rootId, a, filename) {
+  const ext = a.extracted || {};
+  const entry = {
+    id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+    timestamp: new Date().toISOString(),
+    date: ext.date || null,
+    entity: a.entity,
+    vendor: ext.vendor || null,
+    description: ext.description || a.docType,
+    docType: a.docType,
+    transactionType: a.transactionType || "other",
+    amount: ext.amount ? parseFloat(ext.amount) : null,
+    currency: ext.currency || "CAD",
+    gst: ext.gst ? parseFloat(ext.gst) : null,
+    reference: ext.reference || null,
+    filename
+  };
+
+  let existing = [];
+  try {
+    const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${LEDGER_FILE}:/content`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    if (r.ok) existing = await r.json();
+  } catch {}
+
+  existing.push(entry);
+  const bytes = new TextEncoder().encode(JSON.stringify(existing, null, 2));
+  const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${LEDGER_FILE}:/content`, {
+    method: "PUT",
+    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+    body: bytes
+  });
+  if (!r.ok) throw new Error("Ledger update failed: " + r.status);
+}
+
+async function loadLedger() {
+  if (!account) return;
+  try {
+    const token = await getToken();
+    const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
+    const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${LEDGER_FILE}:/content`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    ledgerData = r.ok ? await r.json() : [];
+  } catch { ledgerData = []; }
+  renderLedger();
+}
+
+function switchTab(tab) {
+  document.getElementById("tab-file").className = "nav-tab" + (tab === "file" ? " active" : "");
+  document.getElementById("tab-ledger").className = "nav-tab" + (tab === "ledger" ? " active" : "");
+  document.getElementById("app-panels").classList.toggle("hidden", tab !== "file");
+  document.getElementById("stepbar").classList.toggle("hidden", tab !== "file");
+  document.getElementById("auth-required").classList.toggle("hidden", true);
+  const lp = document.getElementById("ledger-panel");
+  lp.classList.toggle("hidden", tab !== "ledger");
+  if (tab === "ledger" && ledgerData.length === 0) loadLedger();
+}
+
+function renderLedger() {
+  const entityFilter = document.getElementById("lf-entity").value;
+  const yearFilter = document.getElementById("lf-year").value.trim();
+  const typeFilter = document.getElementById("lf-type").value;
+
+  let rows = ledgerData.filter(e => {
+    if (entityFilter && e.entity !== entityFilter) return false;
+    if (yearFilter && e.date && !e.date.startsWith(yearFilter)) return false;
+    if (typeFilter && e.transactionType !== typeFilter) return false;
+    return true;
+  });
+
+  // Sort newest first
+  rows.sort((a, b) => (b.date || b.timestamp) > (a.date || a.timestamp) ? 1 : -1);
+
+  // Compute summary
+  const expenses = rows.filter(r => r.transactionType === "expense" && r.amount);
+  const income = rows.filter(r => r.transactionType === "income" && r.amount);
+  const totalExp = expenses.reduce((s, r) => s + r.amount, 0);
+  const totalInc = income.reduce((s, r) => s + r.amount, 0);
+  const totalGst = rows.filter(r => r.gst).reduce((s, r) => s + r.gst, 0);
+  const net = totalInc - totalExp;
+
+  document.getElementById("ledger-summary").innerHTML = `
+    <div class="summary-card"><div class="summary-label">Revenue</div><div class="summary-value pos">$${totalInc.toLocaleString("en-CA", {minimumFractionDigits:2})}</div></div>
+    <div class="summary-card"><div class="summary-label">Expenses</div><div class="summary-value neg">$${totalExp.toLocaleString("en-CA", {minimumFractionDigits:2})}</div></div>
+    <div class="summary-card"><div class="summary-label">Net</div><div class="summary-value ${net >= 0 ? "pos" : "neg"}">$${net.toLocaleString("en-CA", {minimumFractionDigits:2})}</div></div>
+    <div class="summary-card"><div class="summary-label">GST Paid</div><div class="summary-value acc">$${totalGst.toLocaleString("en-CA", {minimumFractionDigits:2})}</div></div>
+    <div class="summary-card"><div class="summary-label">Transactions</div><div class="summary-value">${rows.length}</div></div>
+  `;
+
+  const tbody = document.getElementById("ledger-tbody");
+  const empty = document.getElementById("ledger-empty");
+
+  if (!rows.length) {
+    tbody.innerHTML = "";
+    empty.classList.remove("hidden");
+    return;
+  }
+  empty.classList.add("hidden");
+
+  tbody.innerHTML = rows.map(r => {
+    const typeCls = r.transactionType === "expense" ? "type-exp" : r.transactionType === "income" ? "type-inc" : "type-oth";
+    const amt = r.amount != null ? `$${r.amount.toLocaleString("en-CA", {minimumFractionDigits:2})}` : "—";
+    const gst = r.gst != null ? `$${r.gst.toLocaleString("en-CA", {minimumFractionDigits:2})}` : "—";
+    return `<tr>
+      <td>${r.date || "—"}</td>
+      <td><span class="entity-tag">${(r.entity || "").split(" ").map(w => w[0]).join("")}</span></td>
+      <td>${r.vendor || "—"}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.description || ""}">${r.description || r.docType}</td>
+      <td><span class="type-badge ${typeCls}">${r.transactionType}</span></td>
+      <td>${gst}</td>
+      <td class="amount-col">${amt}</td>
+    </tr>`;
+  }).join("");
+}
+
 // ── Reset ─────────────────────────────────────────────────────────────────────
 function resetApp() {
   state = { file: null, b64: null, url: "", analysis: null };
   document.getElementById("file-input").value = "";
-  document.getElementById("pdf-url").value = "";
   document.getElementById("notes").value = "";
   document.getElementById("dropzone").classList.remove("hidden");
   document.getElementById("file-chip").classList.add("hidden");
