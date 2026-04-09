@@ -573,8 +573,8 @@ const msalConfig = {
   auth: { 
     clientId: CLIENT_ID, 
     authority: `https://login.microsoftonline.com/${TENANT_ID}`, 
-    redirectUri: "https://chherg11.github.io/hdm/redirect.html",
-    postLogoutRedirectUri: window.location.origin + window.location.pathname
+    redirectUri: "https://chherg11.github.io/hdm/hdm.html",
+    postLogoutRedirectUri: "https://chherg11.github.io/hdm/hdm.html"
   },
   cache: { cacheLocation: "sessionStorage" },
   system: { allowNativeBroker: false }
@@ -607,12 +607,10 @@ async function initAuth() {
 
 async function toggleAuth() {
   if (account) {
-    await msalInstance.logoutPopup(); account = null; graphToken = null; updateAuthUI();
+    await msalInstance.logoutRedirect({ postLogoutRedirectUri: "https://chherg11.github.io/hdm/hdm.html" });
   } else {
     try {
-      const resp = await msalInstance.loginPopup({ scopes: SCOPES });
-      account = resp.account;
-      updateAuthUI();
+      await msalInstance.loginRedirect({ scopes: SCOPES });
     } catch(e) { showError("Sign-in failed: " + e.message); }
   }
 }
@@ -623,7 +621,7 @@ async function getToken() {
     const resp = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account });
     return resp.accessToken;
   } catch {
-    const resp = await msalInstance.acquireTokenPopup({ scopes: SCOPES, account });
+    const resp = await msalInstance.acquireTokenRedirect({ scopes: SCOPES, account });
     return resp.accessToken;
   }
 }
