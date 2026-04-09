@@ -733,6 +733,10 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
           <option value="income">Income</option>
           <option value="other">Other</option>
         </select>
+        <select id="lf-property" onchange="renderLedger()" style="max-width:160px">
+          <option value="">All Properties</option>
+          ${PROPERTIES.map(p => `<option value="${p.address}">${p.address}</option>`).join("")}
+        </select>
         <button class="btn btn-ghost" style="padding:5px 10px;width:auto" onclick="loadLedger()">↻ Refresh</button>
         <button class="btn btn-ghost" style="padding:5px 10px;width:auto;margin-left:auto" onclick="showExportModal()">↓ Year-End Export</button>
         <button class="btn btn-green" style="padding:5px 12px;width:auto" onclick="showManualEntry()">+ Add Transaction</button>
@@ -1451,8 +1455,8 @@ if (window.opener && window.opener !== window) {
 
 const TAXONOMY = {
   "Chris Hergott Personal": ["Tax Returns","Insurance","Legal - Wills - Estate","Vehicles","Medical","Personal Receipts - Expenses","Living Skies Music Festival"],
-  "Chris Hergott Holdings Ltd": ["Corporate Documents","Financial Statements","Tax Documents","Intercompany Transactions","Shareholder - Estate Documents","Contracts - Agreements","Bank Statements","Contractor Invoices"],
-  "C&H Hergott Capital Inc": ["Corporate Documents","Financial Statements","Tax Documents","Intercompany Transactions","Shareholder - Estate Documents","Contracts - Agreements","Bank Statements"],
+  "Chris Hergott Holdings Ltd": ["Corporate Documents","Financial Statements","Tax Documents","Intercompany Transactions","Shareholder - Estate Documents","Contracts - Agreements","Bank Statements","Contractor Invoices","__PROPERTIES__"],
+  "C&H Hergott Capital Inc": ["Corporate Documents","Financial Statements","Tax Documents","Intercompany Transactions","Shareholder - Estate Documents","Contracts - Agreements","Bank Statements","__PROPERTIES__"],
   "CTC Hergott Holdings Ltd": ["Corporate Documents","Financial Statements","Tax Documents","Intercompany Transactions","Shareholder - Estate Documents","Contracts - Agreements","Bank Statements","Permits - Approvals","Contractor Invoices","Legal - Title Documents","Subdivision - Lot Documents"]
 };
 
@@ -1462,6 +1466,25 @@ const ENTITY_ABBREV = {
   "C&H Hergott Capital Inc": "C&HCAP",
   "CTC Hergott Holdings Ltd": "CTC"
 };
+
+// ── Property tracking ─────────────────────────────────────────────────────────
+const PROPERTIES = [
+  { address: "613 11th St Humboldt",          short: "613-11th",   active: true  },
+  { address: "934 10th St Humboldt",          short: "934-10th",   active: true  },
+  { address: "6 Main Bay Muenster",           short: "6-MainBay",  active: true  },
+  { address: "611 12th St Humboldt (Sold 2024)", short: "611-12th", active: false }
+];
+
+const PROPERTY_SUBTYPES = [
+  "Invoices & Expenses",
+  "Lease Agreements",
+  "Insurance",
+  "Property Tax",
+  "Utility Bills",
+  "Permits & Approvals",
+  "Legal & Title Documents",
+  "Correspondence"
+];
 
 // ── MSAL setup ───────────────────────────────────────────────────────────────
 const msalConfig = {
@@ -1735,6 +1758,11 @@ Entity abbreviations for filenames:
 - C&H Hergott Capital Inc → C&HCAP
 - CTC Hergott Holdings Ltd → CTC
 
+PROPERTY DOCUMENTS: Chris Hergott Holdings Ltd and C&H Hergott Capital Inc own rental properties.
+If a document relates to a specific rental property (invoice, lease, utility bill, insurance, property tax, permit), set subfolder to "__PROPERTIES__".
+Properties: ${PROPERTIES.map(p => p.address).join(", ")}.
+Note: properties transferred from CHHL to C&H Cap around mid-2025. Before July 2025 → CHHL. After → C&H Cap. When in doubt use the entity name on the document.
+
 For suggestedFilename: use YYYY-MM-DD_EntityAbbrev_VendorShortName_DocType_Reference.pdf
 VendorShortName = short version of vendor/payee name, no spaces, hyphens if needed. Omit if no vendor.
 
@@ -1765,13 +1793,7 @@ Return exactly this structure:
 }`
   });
 
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-    body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content }] })
-  });
-  const data = await resp.json();
-  if (data.error) throw new Error(data.error.message);
+  const data = await anthropicFetch({ model: "claude-sonnet-4-20250514", max_tokens: 2000, messages: [{ role: "user", content }] });
   const raw = (data.content || []).map(c => c.text || "").join("");
   return JSON.parse(raw.replace(/```json|```/g, "").trim());
 }
@@ -1809,11 +1831,12 @@ function renderBatchReview() {
       `<option value="${e}" ${e === a.entity ? "selected" : ""}>${e}</option>`
     ).join("");
 
-    // Subfolder options for this entity
+    // Subfolder options for this entity (replace __PROPERTIES__ sentinel with readable label)
     const subfolders = TAXONOMY[a.entity] || [];
-    const subOpts = subfolders.map(s =>
-      `<option value="${s}" ${s === a.subfolder ? "selected" : ""}>${s}</option>`
-    ).join("");
+    const subOpts = subfolders.map(s => {
+      if (s === "__PROPERTIES__") return `<option value="__PROPERTIES__">Properties →</option>`;
+      return `<option value="${s}" ${s === a.subfolder ? "selected" : ""}>${s}</option>`;
+    }).join("");
 
     // Extracted metadata
     const ext = a.extracted || {};
@@ -1855,6 +1878,26 @@ function renderBatchReview() {
         </div>
       </div>
 
+      <!-- Property dropdowns (shown only when "Properties" is selected) -->
+      <div id="prop-row-${i}" style="display:${a.subfolder === '__PROPERTIES__' ? 'grid' : 'none'};grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Property</div>
+          <select class="review-select" id="prop-${i}" onchange="updateReviewPath(${i})">
+            ${PROPERTIES.map(p => {
+              // Pre-select if Claude's description mentions this property
+              const matches = a.description && a.description.includes(p.address.split(" ")[0]);
+              return `<option value="${p.address}" ${matches ? "selected" : ""}${!p.active ? " style=\"color:var(--txt3)\"" : ""}>${p.address}${!p.active ? " (Sold)" : ""}</option>`;
+            }).join("")}
+          </select>
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Document Type</div>
+          <select class="review-select" id="proptype-${i}" onchange="updateReviewPath(${i})">
+            ${PROPERTY_SUBTYPES.map(t => `<option>${t}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+
       <!-- Filename -->
       <div style="margin-bottom:8px">
         <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Filename</div>
@@ -1862,7 +1905,7 @@ function renderBatchReview() {
       </div>
 
       <!-- Path display -->
-      <div style="font-family:var(--mono);font-size:9px;color:var(--grn);padding:5px 0;word-break:break-all" id="path-${i}">${a.onedrivePath}</div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--grn);padding:5px 0;word-break:break-all" id="path-${i}">${a.subfolder === '__PROPERTIES__' ? `${ROOT_FOLDER}/${a.entity}/Properties/${PROPERTIES[0].address}/${PROPERTY_SUBTYPES[0]}` : a.onedrivePath}</div>
 
       <!-- Confidence + dup warning -->
       <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
@@ -1908,22 +1951,38 @@ function updateReviewEntity(i) {
   const entity = document.getElementById("ent-" + i).value;
   const subSel = document.getElementById("sub-" + i);
   const subfolders = TAXONOMY[entity] || [];
-  subSel.innerHTML = subfolders.map(s => `<option value="${s}">${s}</option>`).join("");
+  subSel.innerHTML = subfolders.map(s => {
+    if (s === "__PROPERTIES__") return `<option value="__PROPERTIES__">Properties →</option>`;
+    return `<option value="${s}">${s}</option>`;
+  }).join("");
   updateReviewPath(i);
 }
 
 function updateReviewPath(i) {
-  const entity = document.getElementById("ent-" + i).value;
+  const entity   = document.getElementById("ent-" + i).value;
   const subfolder = document.getElementById("sub-" + i).value;
-  const newPath = `${ROOT_FOLDER}/${entity}/${subfolder}`;
+  const propRow  = document.getElementById("prop-row-" + i);
+
+  let relativePath;
+  if (subfolder === "__PROPERTIES__") {
+    // Show property + subtype dropdowns
+    if (propRow) propRow.style.display = "grid";
+    const prop     = (document.getElementById("prop-" + i) || {}).value || PROPERTIES[0].address;
+    const proptype = (document.getElementById("proptype-" + i) || {}).value || PROPERTY_SUBTYPES[0];
+    relativePath = `Properties/${prop}/${proptype}`;
+  } else {
+    // Hide property dropdowns
+    if (propRow) propRow.style.display = "none";
+    relativePath = subfolder;
+  }
+
+  const newPath = `${ROOT_FOLDER}/${entity}/${relativePath}`;
   document.getElementById("path-" + i).textContent = newPath;
 
-  // Also update filename abbrev if it still matches original pattern
+  // Update entity abbreviation in filename if still standard format
   const fnInput = document.getElementById("fn-" + i);
   const abbrev = ENTITY_ABBREV[entity] || entity.replace(/\s/g, "").slice(0, 4).toUpperCase();
-  const current = fnInput.value;
-  // Replace entity portion (second segment) in filename
-  const parts = current.split("_");
+  const parts = fnInput.value.split("_");
   if (parts.length >= 2) {
     const knownAbbrevs = Object.values(ENTITY_ABBREV);
     if (knownAbbrevs.includes(parts[1])) {
@@ -1958,15 +2017,24 @@ async function runSave() {
       const a = item.analysis;
       const fnInput = document.getElementById("fn-" + i);
       const filename = (fnInput && fnInput.value.trim()) || a.suggestedFilename;
-      // Read entity/subfolder from dropdowns if user changed them
       const entSel = document.getElementById("ent-" + i);
       const subSel = document.getElementById("sub-" + i);
       const entity = (entSel && entSel.value) || a.entity;
       const subfolder = (subSel && subSel.value) || a.subfolder;
-      const folderPath = `${ROOT_FOLDER}/${entity}/${subfolder}`;
-      // Patch analysis so downstream functions (ledger, FS, bank) use the correct entity
+
+      // Build relative path — handle property nested structure
+      let relativePath;
+      if (subfolder === "__PROPERTIES__") {
+        const prop     = (document.getElementById("prop-" + i) || {}).value || PROPERTIES[0].address;
+        const proptype = (document.getElementById("proptype-" + i) || {}).value || PROPERTY_SUBTYPES[0];
+        relativePath = `Properties/${prop}/${proptype}`;
+      } else {
+        relativePath = subfolder;
+      }
+
+      const folderPath = `${ROOT_FOLDER}/${entity}/${relativePath}`;
       a.entity = entity;
-      a.subfolder = subfolder;
+      a.subfolder = relativePath;
       a.onedrivePath = folderPath;
 
       addLog("save-log", `Filing: ${filename}`, "info");
@@ -1978,12 +2046,11 @@ async function runSave() {
           item.status = "duplicate";
           continue;
         }
-        const pathParts = folderPath.replace(ROOT_FOLDER + "/", "").split("/");
-        let parentId = rootId;
-        for (const part of pathParts) {
-          parentId = await ensureFolder(token, parentId, part);
-        }
-        await uploadFile(token, parentId, filename, item.b64);
+        // Create folder chain (handles nested property paths like Properties/934 10th St/Invoices)
+        const relPath = folderPath.replace(ROOT_FOLDER + "/", "").replace(/^[^/]+\//, ""); // strip entity prefix
+        const entityFolder = await ensureFolder(token, rootId, entity);
+        const finalFolderId = await ensureFolderPath(token, entityFolder, relPath);
+        await uploadFile(token, finalFolderId, filename, item.b64);
         addLog("save-log", `✓ ${filename}`, "ok");
         await updateJsonLog(token, rootId, a, filename, folderPath);
         await updateExcelLog(token, rootId, a, filename, folderPath);
@@ -2002,7 +2069,7 @@ async function runSave() {
         }
 
         // If insurance or contract, extract expiry date for alerts
-        if (a.subfolder && /insurance|contracts|agreements|permits|license/i.test(a.subfolder)) {
+        if (a.subfolder && /insurance|contracts|agreements|permits|license|lease/i.test(a.subfolder)) {
           try {
             const expiry = await extractExpiryDate(item.b64, a, filename);
             if (expiry) {
@@ -2056,16 +2123,16 @@ async function runSave() {
 // ── Duplicate Checks ──────────────────────────────────────────────────────────
 
 async function checkDocumentDuplicate(token, rootId, filename, analysis) {
-  let docLog = [];
+  let localDocLog = [];
   try {
     const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/document_log.json:/content`, {
       headers: { Authorization: "Bearer " + token }
     });
-    if (r.ok) docLog = await r.json();
+    if (r.ok) localDocLog = await r.json();
   } catch { return { isDuplicate: false }; }
 
   // 1. Exact filename match
-  const filenameMatch = docLog.find(e => e.filename === filename);
+  const filenameMatch = localDocLog.find(e => e.filename === filename);
   if (filenameMatch) {
     return { isDuplicate: true, reason: `Filename "${filename}" already filed on ${filenameMatch.timestamp?.slice(0,10) || "unknown date"}` };
   }
@@ -2074,7 +2141,7 @@ async function checkDocumentDuplicate(token, rootId, filename, analysis) {
   const ext = analysis.extracted || {};
   if (ext.reference && ext.amount) {
     const amt = String(ext.amount).replace(/[^0-9.]/g, "");
-    const sameDoc = docLog.find(e => {
+    const sameDoc = localDocLog.find(e => {
       const eExt = e.extracted || {};
       const eAmt = String(eExt.amount || "").replace(/[^0-9.]/g, "");
       return e.entity === analysis.entity &&
@@ -2189,6 +2256,17 @@ async function ensureFolder(token, parentId, name) {
     name, folder: {}, "@microsoft.graph.conflictBehavior": "fail"
   });
   return result.id;
+}
+
+// Create a chain of nested folders from a slash-separated path
+// e.g. "Properties/613 11th St Humboldt/Invoices & Expenses"
+async function ensureFolderPath(token, rootId, relativePath) {
+  const segments = relativePath.split("/").map(s => s.trim()).filter(Boolean);
+  let parentId = rootId;
+  for (const segment of segments) {
+    parentId = await ensureFolder(token, parentId, segment);
+  }
+  return parentId;
 }
 
 async function uploadFile(token, parentId, filename, b64) {
@@ -2374,14 +2452,16 @@ function switchTab(tab) {
 
 
 function renderLedger() {
-  const entityFilter = document.getElementById("lf-entity").value;
-  const yearFilter = document.getElementById("lf-year").value.trim();
-  const typeFilter = document.getElementById("lf-type").value;
+  const entityFilter   = document.getElementById("lf-entity").value;
+  const yearFilter     = document.getElementById("lf-year").value.trim();
+  const typeFilter     = document.getElementById("lf-type").value;
+  const propertyFilter = document.getElementById("lf-property")?.value || "";
 
   let rows = ledgerData.filter(e => {
-    if (entityFilter && e.entity !== entityFilter) return false;
-    if (yearFilter && e.date && !e.date.startsWith(yearFilter)) return false;
-    if (typeFilter && e.transactionType !== typeFilter) return false;
+    if (entityFilter   && e.entity !== entityFilter) return false;
+    if (yearFilter     && e.date && !e.date.startsWith(yearFilter)) return false;
+    if (typeFilter     && e.transactionType !== typeFilter) return false;
+    if (propertyFilter && !(e.subfolder || "").includes(propertyFilter)) return false;
     return true;
   });
 
@@ -2520,13 +2600,7 @@ Return exactly this structure:
     }
   ];
 
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-    body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 3000, messages: [{ role: "user", content }] })
-  });
-  const data = await resp.json();
-  if (data.error) throw new Error(data.error.message);
+  const data = await anthropicFetch({ model: "claude-sonnet-4-20250514", max_tokens: 8000, messages: [{ role: "user", content }] });
   const raw = (data.content || []).map(c => c.text || "").join("");
   return JSON.parse(raw.replace(/```json|```/g, "").trim());
 }
@@ -2713,13 +2787,7 @@ Return exactly this structure:
 Extract every single transaction row. Do not skip any. Debits are outflows (money leaving), credits are inflows (money coming in).` }
   ];
 
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-    body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 4000, messages: [{ role: "user", content }] })
-  });
-  const data = await resp.json();
-  if (data.error) throw new Error(data.error.message);
+  const data = await anthropicFetch({ model: "claude-sonnet-4-20250514", max_tokens: 16000, messages: [{ role: "user", content }] });
   const raw = (data.content || []).map(c => c.text || "").join("");
   const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
   parsed.id = Date.now() + "-" + Math.random().toString(36).slice(2,6);
@@ -3825,19 +3893,25 @@ async function loadLoans() {
 }
 
 async function saveLoansToCloud() {
-  const token = await getToken();
-  const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-  const bytes = new TextEncoder().encode(JSON.stringify(loansData, null, 2));
-  await fetch(`${GRAPH}/me/drive/items/${rootId}:/${LOANS_FILE}:/content`, {
-    method: "PUT",
-    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
-    body: bytes
-  });
+  try {
+    const token = await getToken();
+    const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
+    const bytes = new TextEncoder().encode(JSON.stringify(loansData, null, 2));
+    const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${LOANS_FILE}:/content`, {
+      method: "PUT",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: bytes
+    });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+  } catch(e) {
+    throw new Error("Failed to save loans: " + e.message);
+  }
 }
 
 // Standard amortization: monthly payment, rate per period, balance
 function calcAmortization(balance, annualRate, monthlyPayment, asOfDate, maxMonths = 360) {
-  const monthlyRate = annualRate / 100 / 12;
+  // Canadian semi-annual compounding (Interest Act)
+  const monthlyRate = Math.pow(1 + annualRate / 200, 1 / 6) - 1;
   const schedule = [];
   let bal = balance;
   let d = new Date(asOfDate);
@@ -4550,14 +4624,11 @@ function clearSearch() {
   document.getElementById("srch-q").focus();
 }
 
-function copyPath(path) {
-  navigator.clipboard.writeText(path).then(() => {
-    const btns = document.querySelectorAll(".srch-result-actions button");
-    // Find the button that was clicked — brief flash
-  }).catch(() => {});
-  // Show a temporary confirmation
-  event.target.textContent = "Copied!";
-  setTimeout(() => { event.target.textContent = "Copy Path"; }, 1500);
+function copyPath(path, btn) {
+  navigator.clipboard.writeText(path).catch(() => {});
+  const orig = btn.textContent;
+  btn.textContent = "Copied!";
+  setTimeout(() => { btn.textContent = orig; }, 1500);
 }
 
 function exportSearchCSV() {
@@ -4837,7 +4908,11 @@ async function linkIcPair() {
   intercoLinks[id2] = id1;
   icSelection = [];
   document.getElementById("ic-link-bar").classList.add("hidden");
-  await saveIntercoLinks();
+  try {
+    await saveIntercoLinks();
+  } catch(e) {
+    console.error("Failed to persist interco links:", e.message);
+  }
   renderInterco();
 }
 
@@ -4861,31 +4936,28 @@ Return this structure if a date is found, otherwise return null:
 }` }
   ];
 
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-    body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 500, messages: [{ role: "user", content }] })
-  });
-  const data = await resp.json();
-  if (data.error) throw new Error(data.error.message);
+  const data = await anthropicFetch({ model: "claude-sonnet-4-20250514", max_tokens: 500, messages: [{ role: "user", content }] });
   const raw = (data.content || []).map(c => c.text || "").join("").replace(/```json|```/g, "").trim();
   if (raw === "null" || !raw) return null;
-  const parsed = JSON.parse(raw);
-  if (!parsed?.expiry) return null;
-
-  return {
-    id: Date.now() + "-" + Math.random().toString(36).slice(2, 6),
-    name: parsed.description || filename,
-    entity: analysis.entity,
-    type: parsed.type || "Insurance Policy",
-    expiry: parsed.expiry,
-    warnDays: parsed.warn_days || 90,
-    notes: [parsed.insurer_or_counterparty, parsed.policy_or_ref_number].filter(Boolean).join(" · "),
-    filename,
-    dismissed: false,
-    renewed: false,
-    createdAt: new Date().toISOString()
-  };
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed?.expiry) return null;
+    return {
+      id: Date.now() + "-" + Math.random().toString(36).slice(2, 6),
+      name: parsed.description || filename,
+      entity: analysis.entity,
+      type: parsed.type || "Insurance Policy",
+      expiry: parsed.expiry,
+      warnDays: parsed.warn_days || 90,
+      notes: [parsed.insurer_or_counterparty, parsed.policy_or_ref_number].filter(Boolean).join(" · "),
+      filename,
+      dismissed: false,
+      renewed: false,
+      createdAt: new Date().toISOString()
+    };
+  } catch(e) {
+    throw new Error("Expiry extraction failed: " + e.message);
+  }
 }
 
 async function saveAlertFromDocument(alert) {
@@ -4927,14 +4999,19 @@ async function loadAlerts() {
 }
 
 async function persistAlerts() {
-  const token = await getToken();
-  const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-  const bytes = new TextEncoder().encode(JSON.stringify(alertsData, null, 2));
-  await fetch(`${GRAPH}/me/drive/items/${rootId}:/${ALERTS_FILE}:/content`, {
-    method: "PUT",
-    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
-    body: bytes
-  });
+  try {
+    const token = await getToken();
+    const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
+    const bytes = new TextEncoder().encode(JSON.stringify(alertsData, null, 2));
+    const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${ALERTS_FILE}:/content`, {
+      method: "PUT",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: bytes
+    });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+  } catch(e) {
+    throw new Error("Failed to save alerts: " + e.message);
+  }
 }
 
 function daysUntil(dateStr) {
