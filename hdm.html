@@ -776,12 +776,23 @@ Taxonomy: ${JSON.stringify(TAXONOMY)}
 Root folder: "${ROOT_FOLDER}"
 Today's date: ${new Date().toISOString().slice(0, 10)}
 
+Entity abbreviations for filenames:
+- Personal → PERS
+- Muran Holdings → MH
+- Chris Hergott Holdings → CHHL
+- C+C Hergott Holdings → CCHH
+- CTC Hergott Holdings → CTCHH
+- C&H Hergott Capital Inc → CHHCI
+
+For suggestedFilename: use YYYY-MM-DD_EntityAbbrev_VendorShortName_DocType_Reference.pdf
+VendorShortName = short version of vendor/payee name (e.g. "Telus", "SASK-Energy", "CRA"), no spaces, use hyphens if needed. If no vendor, omit.
+
 Return exactly this structure:
 {
   "entity": "<exact entity key from taxonomy>",
   "subfolder": "<exact subfolder name for that entity>",
   "docType": "<brief document type e.g. Invoice, Bank Statement, Corporate Resolution>",
-  "suggestedFilename": "<YYYY-MM-DD_EntityAbbrev_DocType_Reference.pdf>",
+  "suggestedFilename": "<YYYY-MM-DD_EntityAbbrev_Vendor_DocType_Reference.pdf>",
   "onedrivePath": "${ROOT_FOLDER}/<entity>/<subfolder>",
   "extracted": {
     "date": "<document date or null>",
