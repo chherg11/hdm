@@ -1789,26 +1789,43 @@ let apiKey = localStorage.getItem("hdm_api_key") || "";
 // ── Anthropic API ─────────────────────────────────────────────────────────────
 async function anthropicFetch(params) {
   if (!apiKey) { promptApiKey(); if (!apiKey) throw new Error("No API key set."); }
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-      "anthropic-dangerous-direct-browser-access": "true"
-    },
-    body: JSON.stringify(params)
-  });
-  if (!response.ok) {
-    const errText = await response.text();
-    if (response.status === 401) {
-      localStorage.removeItem("hdm_api_key");
-      apiKey = "";
-      throw new Error("Invalid API key — please re-enter your Anthropic API key.");
+  const maxRetries = 4;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    let response;
+    try {
+      response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "content-type": "application/json",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify(params)
+      });
+    } catch(e) {
+      throw new Error("Network error calling Anthropic API: " + e.message);
     }
-    throw new Error("Anthropic API " + response.status + ": " + errText.slice(0, 300));
+    if (response.status === 429) {
+      const retryAfter = parseInt(response.headers.get("retry-after") || "0", 10);
+      const wait = retryAfter > 0 ? retryAfter * 1000 : Math.min(60000, 15000 * Math.pow(2, attempt));
+      console.warn(`Rate limited. Waiting ${wait/1000}s (attempt ${attempt+1}/${maxRetries})`);
+      setStatus(account ? account.username : "", "warn", `Rate limit — waiting ${Math.round(wait/1000)}s...`);
+      await new Promise(r => setTimeout(r, wait));
+      continue;
+    }
+    if (!response.ok) {
+      const errText = await response.text();
+      if (response.status === 401) {
+        localStorage.removeItem("hdm_api_key");
+        apiKey = "";
+        throw new Error("Invalid API key — please re-enter your Anthropic API key.");
+      }
+      throw new Error("Anthropic API " + response.status + ": " + errText.slice(0, 300));
+    }
+    return response.json();
   }
-  return response.json();
+  throw new Error("Rate limit: max retries exceeded. Try fewer documents at once, or wait a minute and retry.");
 }
 
 // ── State ────────────────────────────────────────────────────────────────────
@@ -2022,6 +2039,11 @@ async function runAnalysis() {
     } catch(e) {
       state.analyses.push({ file: f, b64: null, analysis: null, status: "error", error: e.message });
       updateBatchProgress(i, f.name, "err", "Failed: " + e.message);
+    }
+    // Pace between documents to avoid rate limits (large PDFs use ~10-20K tokens each)
+    if (i < total - 1) {
+      setProgress(Math.round(((i + 0.9) / total) * 90), `Pacing requests... (${i+1}/${total} done)`);
+      await new Promise(r => setTimeout(r, 5000));
     }
   }
 
