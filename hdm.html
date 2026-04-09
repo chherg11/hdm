@@ -966,55 +966,42 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
     <div id="rr-properties"></div>
     <div id="rr-payments-card" class="card hidden">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div class="card-title" style="margin-bottom:0">Payment Log &#8212; <span id="rr-pay-tenant-name"></span></div>
+        <div class="card-title" style="margin-bottom:0">Payment Log &mdash; <span id="rr-pay-tenant-name"></span></div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-ghost" style="padding:3px 8px;width:auto;font-size:9px" onclick="document.getElementById('rr-payments-card').classList.add('hidden')">&#10005; Close</button>
           <button class="btn btn-green" style="padding:3px 10px;width:auto;font-size:9px" onclick="showRentPayModal()">+ Record Payment</button>
         </div>
       </div>
       <div style="overflow-x:auto">
-        <table class="ledger-table">
-          <thead><tr><th>Date</th><th>Period</th><th style="text-align:right">Amount</th><th>Method</th><th>Notes</th><th></th></tr></thead>
-          <tbody id="rr-pay-tbody"></tbody>
-        </table>
+        <table class="ledger-table"><thead><tr><th>Date</th><th>Period</th><th style="text-align:right">Amount</th><th>Method</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="rr-pay-tbody"></tbody></table>
         <div id="rr-pay-empty" class="hidden" style="text-align:center;padding:20px;font-family:var(--mono);font-size:11px;color:var(--txt3)">No payments recorded yet.</div>
       </div>
     </div>
   </div>
-
   <!-- Tenant modal -->
   <div id="tenant-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1001;display:flex;align-items:center;justify-content:center">
     <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:4px;padding:24px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto">
       <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--acc);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px" id="tenant-modal-title">Add Tenant</div>
       <input type="hidden" id="tenant-edit-id">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="field" style="grid-column:1/-1"><label>Tenant Name</label><input type="text" id="tn-name" placeholder="e.g. John Smith" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-        <div class="field"><label>Property</label><select id="tn-property" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option>613 11th St Humboldt</option><option>934 10th St Humboldt</option><option>6 Main Bay Muenster</option>
-        </select></div>
-        <div class="field"><label>Unit / Suite (optional)</label><input type="text" id="tn-unit" placeholder="e.g. Main, Suite 1" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-        <div class="field"><label>Entity</label><select id="tn-entity" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option>
-        </select></div>
+        <div class="field" style="grid-column:1/-1"><label>Tenant Name</label><input type="text" id="tn-name" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
+        <div class="field"><label>Property</label><select id="tn-property" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option>613 11th St Humboldt</option><option>934 10th St Humboldt</option><option>6 Main Bay Muenster</option></select></div>
+        <div class="field"><label>Unit / Suite (optional)</label><input type="text" id="tn-unit" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
+        <div class="field"><label>Entity</label><select id="tn-entity" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option></select></div>
         <div class="field"><label>Monthly Rent (CAD)</label><input type="number" id="tn-rent" min="0" step="0.01" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Lease Start</label><input type="date" id="tn-start" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Lease End (blank = month-to-month)</label><input type="date" id="tn-end" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Deposit Held (CAD)</label><input type="number" id="tn-deposit" min="0" step="0.01" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Rent Due Day</label><input type="number" id="tn-dueday" value="1" min="1" max="28" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Contact</label><input type="text" id="tn-contact" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-        <div class="field" style="grid-column:1/-1"><label>Status</label><select id="tn-status" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option value="active">Active</option><option value="vacant">Vacant</option><option value="notice">Notice Given</option><option value="past">Past Tenant</option>
-        </select></div>
+        <div class="field" style="grid-column:1/-1"><label>Status</label><select id="tn-status" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option value="active">Active</option><option value="vacant">Vacant</option><option value="notice">Notice Given</option><option value="past">Past Tenant</option></select></div>
         <div class="field" style="grid-column:1/-1"><label>Notes</label><input type="text" id="tn-notes" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
       </div>
       <div id="tenant-modal-error" class="hidden" style="font-family:var(--mono);font-size:10px;color:var(--red);margin:8px 0"></div>
-      <div class="btn-row" style="margin-top:4px">
-        <button class="btn btn-ghost" onclick="closeTenantModal()">Cancel</button>
-        <button class="btn btn-green" onclick="saveTenant()">Save Tenant</button>
-      </div>
+      <div class="btn-row" style="margin-top:4px"><button class="btn btn-ghost" onclick="closeTenantModal()">Cancel</button><button class="btn btn-green" onclick="saveTenant()">Save Tenant</button></div>
     </div>
   </div>
-
   <!-- Rent payment modal -->
   <div id="rent-pay-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1002;display:flex;align-items:center;justify-content:center">
     <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:4px;padding:24px;width:100%;max-width:420px">
@@ -1023,15 +1010,10 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
       <div class="field"><label>Payment Date</label><input type="date" id="rp-date" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
       <div class="field"><label>Period (month)</label><input type="month" id="rp-period" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
       <div class="field"><label>Amount (CAD)</label><input type="number" id="rp-amount" min="0" step="0.01" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-      <div class="field"><label>Method</label><select id="rp-method" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-        <option>E-Transfer</option><option>Cheque</option><option>Cash</option><option>EFT</option>
-      </select></div>
+      <div class="field"><label>Method</label><select id="rp-method" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option>E-Transfer</option><option>Cheque</option><option>Cash</option><option>EFT</option></select></div>
       <div class="field"><label>Notes (optional)</label><input type="text" id="rp-notes" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
       <div id="rp-error" class="hidden" style="font-family:var(--mono);font-size:10px;color:var(--red);margin:8px 0"></div>
-      <div class="btn-row" style="margin-top:4px">
-        <button class="btn btn-ghost" onclick="closeRentPayModal()">Cancel</button>
-        <button class="btn btn-green" onclick="saveRentPayment()">Save Payment</button>
-      </div>
+      <div class="btn-row" style="margin-top:4px"><button class="btn btn-ghost" onclick="closeRentPayModal()">Cancel</button><button class="btn btn-green" onclick="saveRentPayment()">Save Payment</button></div>
     </div>
   </div>
 
@@ -1039,11 +1021,9 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
   <div id="lots-panel" class="hidden">
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div class="card-title" style="margin-bottom:0">CTC Hergott Holdings &#8212; Lot Tracker</div>
+        <div class="card-title" style="margin-bottom:0">CTC Hergott Holdings &mdash; Lot Tracker</div>
         <div style="display:flex;gap:6px">
-          <select id="lt-filter-status" onchange="renderLots()" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:4px 8px">
-            <option value="">All Statuses</option><option value="available">Available</option><option value="conditional">Conditional</option><option value="sold">Sold</option><option value="reserved">Reserved</option><option value="development">Under Development</option>
-          </select>
+          <select id="lt-filter-status" onchange="renderLots()" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:4px 8px"><option value="">All Statuses</option><option value="available">Available</option><option value="conditional">Conditional</option><option value="sold">Sold</option><option value="reserved">Reserved</option><option value="development">Under Development</option></select>
           <button class="btn btn-ghost" style="padding:4px 10px;width:auto;font-size:10px" onclick="loadLots()">&#8635; Refresh</button>
           <button class="btn btn-green" style="padding:4px 12px;width:auto;font-size:10px" onclick="showLotModal()">+ Add Lot</button>
         </div>
@@ -1052,19 +1032,16 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
     </div>
     <div id="lots-list"></div>
   </div>
-
   <!-- Lot modal -->
   <div id="lot-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1001;display:flex;align-items:center;justify-content:center">
     <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:4px;padding:24px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto">
       <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--acc);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px" id="lot-modal-title">Add Lot</div>
       <input type="hidden" id="lot-edit-id">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="field"><label>Lot / Block ID</label><input type="text" id="lt-id-input" placeholder="e.g. Lot 12 Block 4" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-        <div class="field"><label>Subdivision</label><input type="text" id="lt-sub" placeholder="e.g. Hergott Estates Ph1" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-        <div class="field"><label>Status</label><select id="lt-status" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option value="available">Available</option><option value="conditional">Conditional</option><option value="sold">Sold</option><option value="reserved">Reserved</option><option value="development">Under Development</option>
-        </select></div>
-        <div class="field"><label>Size</label><input type="text" id="lt-size" placeholder="e.g. 0.35 acres" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
+        <div class="field"><label>Lot / Block ID</label><input type="text" id="lt-id-input" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
+        <div class="field"><label>Subdivision</label><input type="text" id="lt-sub" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
+        <div class="field"><label>Status</label><select id="lt-status" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option value="available">Available</option><option value="conditional">Conditional</option><option value="sold">Sold</option><option value="reserved">Reserved</option><option value="development">Under Development</option></select></div>
+        <div class="field"><label>Size</label><input type="text" id="lt-size" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>List Price (CAD)</label><input type="number" id="lt-listprice" min="0" step="100" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Sale Price (CAD)</label><input type="number" id="lt-saleprice" min="0" step="100" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Sale Date</label><input type="date" id="lt-saledate" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
@@ -1074,14 +1051,11 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
         <div class="field" style="grid-column:1/-1"><label>Notes</label><input type="text" id="lt-notes" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
       </div>
       <div id="lot-modal-error" class="hidden" style="font-family:var(--mono);font-size:10px;color:var(--red);margin:8px 0"></div>
-      <div class="btn-row" style="margin-top:4px">
-        <button class="btn btn-ghost" onclick="closeLotModal()">Cancel</button>
-        <button class="btn btn-green" onclick="saveLot()">Save Lot</button>
-      </div>
+      <div class="btn-row" style="margin-top:4px"><button class="btn btn-ghost" onclick="closeLotModal()">Cancel</button><button class="btn btn-green" onclick="saveLot()">Save Lot</button></div>
     </div>
   </div>
 
-  <!-- SHAREHOLDER LOANS PANEL -->
+  <!-- SH LOANS PANEL -->
   <div id="shloans-panel" class="hidden">
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -1095,53 +1069,37 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
     </div>
     <div id="shloans-list"></div>
   </div>
-
   <!-- SH Loan modal -->
   <div id="shloan-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1001;display:flex;align-items:center;justify-content:center">
     <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:4px;padding:24px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto">
       <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--acc);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px" id="shloan-modal-title">Add Shareholder Loan</div>
       <input type="hidden" id="shl-edit-id">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="field" style="grid-column:1/-1"><label>Description</label><input type="text" id="shl-name" placeholder="e.g. Chris advances to CHHL - working capital" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-        <div class="field"><label>Lender / Source</label><select id="shl-lender" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option>Chris Hergott Personal</option><option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option><option>CTC Hergott Holdings Ltd</option>
-        </select></div>
-        <div class="field"><label>Borrower</label><select id="shl-borrower" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option><option>CTC Hergott Holdings Ltd</option><option>Chris Hergott Personal</option>
-        </select></div>
+        <div class="field" style="grid-column:1/-1"><label>Description</label><input type="text" id="shl-name" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
+        <div class="field"><label>Lender / Source</label><select id="shl-lender" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option>Chris Hergott Personal</option><option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option><option>CTC Hergott Holdings Ltd</option></select></div>
+        <div class="field"><label>Borrower</label><select id="shl-borrower" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option><option>CTC Hergott Holdings Ltd</option><option>Chris Hergott Personal</option></select></div>
         <div class="field"><label>Original Amount (CAD)</label><input type="number" id="shl-original" min="0" step="0.01" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Current Balance (CAD)</label><input type="number" id="shl-balance" min="0" step="0.01" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Interest Rate (% / yr)</label><input type="number" id="shl-rate" min="0" max="30" step="0.01" value="0" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Date Established</label><input type="date" id="shl-date" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-        <div class="field"><label>Repayment Terms</label><select id="shl-terms" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option>On Demand</option><option>Annual</option><option>Monthly</option><option>Quarterly</option><option>Upon Liquidity Event</option>
-        </select></div>
+        <div class="field"><label>Repayment Terms</label><select id="shl-terms" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option>On Demand</option><option>Annual</option><option>Monthly</option><option>Quarterly</option><option>Upon Liquidity Event</option></select></div>
         <div class="field" style="grid-column:1/-1"><label>Notes / Purpose</label><input type="text" id="shl-notes" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
       </div>
       <div id="shloan-modal-error" class="hidden" style="font-family:var(--mono);font-size:10px;color:var(--red);margin:8px 0"></div>
-      <div class="btn-row" style="margin-top:4px">
-        <button class="btn btn-ghost" onclick="closeShLoanModal()">Cancel</button>
-        <button class="btn btn-green" onclick="saveShLoan()">Save</button>
-      </div>
+      <div class="btn-row" style="margin-top:4px"><button class="btn btn-ghost" onclick="closeShLoanModal()">Cancel</button><button class="btn btn-green" onclick="saveShLoan()">Save</button></div>
     </div>
   </div>
-
   <!-- SH Loan transaction modal -->
   <div id="shl-tx-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1002;display:flex;align-items:center;justify-content:center">
     <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:4px;padding:24px;width:100%;max-width:420px">
       <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--acc);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px">Record Transaction</div>
       <input type="hidden" id="shltx-loan-id">
       <div class="field"><label>Date</label><input type="date" id="shltx-date" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-      <div class="field"><label>Type</label><select id="shltx-type" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-        <option value="advance">Advance (increases balance)</option><option value="repayment">Repayment (decreases balance)</option><option value="interest">Interest Accrual</option>
-      </select></div>
+      <div class="field"><label>Type</label><select id="shltx-type" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option value="advance">Advance (increases balance)</option><option value="repayment">Repayment (decreases balance)</option><option value="interest">Interest Accrual</option></select></div>
       <div class="field"><label>Amount (CAD)</label><input type="number" id="shltx-amount" min="0" step="0.01" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
       <div class="field"><label>Notes</label><input type="text" id="shltx-notes" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
       <div id="shltx-error" class="hidden" style="font-family:var(--mono);font-size:10px;color:var(--red);margin:8px 0"></div>
-      <div class="btn-row" style="margin-top:4px">
-        <button class="btn btn-ghost" onclick="closeShLTxModal()">Cancel</button>
-        <button class="btn btn-green" onclick="saveShLTx()">Save Transaction</button>
-      </div>
+      <div class="btn-row" style="margin-top:4px"><button class="btn btn-ghost" onclick="closeShLTxModal()">Cancel</button><button class="btn btn-green" onclick="saveShLTx()">Save Transaction</button></div>
     </div>
   </div>
 
@@ -1151,9 +1109,7 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div class="card-title" style="margin-bottom:0">Corporate Tax Installments</div>
         <div style="display:flex;gap:6px">
-          <select id="ti-year" onchange="renderTaxInst()" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:4px 8px">
-            <option value="">All Years</option>
-          </select>
+          <select id="ti-year" onchange="renderTaxInst()" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:4px 8px"><option value="">All Years</option></select>
           <button class="btn btn-ghost" style="padding:4px 10px;width:auto;font-size:10px" onclick="loadTaxInst()">&#8635; Refresh</button>
           <button class="btn btn-green" style="padding:4px 12px;width:auto;font-size:10px" onclick="showTaxInstModal()">+ Add Installment</button>
         </div>
@@ -1162,34 +1118,24 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
     </div>
     <div id="taxinst-list"></div>
   </div>
-
   <!-- Tax installment modal -->
   <div id="taxinst-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1001;display:flex;align-items:center;justify-content:center">
     <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:4px;padding:24px;width:100%;max-width:480px">
       <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--acc);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px" id="ti-modal-title">Add Tax Installment</div>
       <input type="hidden" id="ti-edit-id">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="field"><label>Entity</label><select id="ti-entity" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option><option>CTC Hergott Holdings Ltd</option>
-        </select></div>
-        <div class="field"><label>Tax Year</label><input type="number" id="ti-taxyear" placeholder="2025" min="2020" max="2035" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-        <div class="field"><label>Quarter</label><select id="ti-quarter" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option value="Q1">Q1</option><option value="Q2">Q2</option><option value="Q3">Q3</option><option value="Q4">Q4</option><option value="Final">Final Balance</option>
-        </select></div>
+        <div class="field"><label>Entity</label><select id="ti-entity" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option><option>CTC Hergott Holdings Ltd</option></select></div>
+        <div class="field"><label>Tax Year</label><input type="number" id="ti-taxyear" min="2020" max="2035" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
+        <div class="field"><label>Quarter</label><select id="ti-quarter" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option value="Q1">Q1</option><option value="Q2">Q2</option><option value="Q3">Q3</option><option value="Q4">Q4</option><option value="Final">Final Balance</option></select></div>
         <div class="field"><label>Due Date</label><input type="date" id="ti-due" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Amount Due (CAD)</label><input type="number" id="ti-amount" min="0" step="0.01" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Amount Paid (CAD)</label><input type="number" id="ti-paid" min="0" step="0.01" placeholder="0.00" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Payment Date</label><input type="date" id="ti-paydate" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-        <div class="field"><label>Type</label><select id="ti-type" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option>Federal (CRA)</option><option>Provincial (Sask)</option>
-        </select></div>
+        <div class="field"><label>Type</label><select id="ti-type" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option>Federal (CRA)</option><option>Provincial (Sask)</option></select></div>
         <div class="field" style="grid-column:1/-1"><label>Notes</label><input type="text" id="ti-notes" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
       </div>
       <div id="ti-modal-error" class="hidden" style="font-family:var(--mono);font-size:10px;color:var(--red);margin:8px 0"></div>
-      <div class="btn-row" style="margin-top:4px">
-        <button class="btn btn-ghost" onclick="closeTaxInstModal()">Cancel</button>
-        <button class="btn btn-green" onclick="saveTaxInst()">Save</button>
-      </div>
+      <div class="btn-row" style="margin-top:4px"><button class="btn btn-ghost" onclick="closeTaxInstModal()">Cancel</button><button class="btn btn-green" onclick="saveTaxInst()">Save</button></div>
     </div>
   </div>
 
@@ -1199,9 +1145,7 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div class="card-title" style="margin-bottom:0">Dividend &amp; Distribution Log</div>
         <div style="display:flex;gap:6px">
-          <select id="div-year" onchange="renderDividends()" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:4px 8px">
-            <option value="">All Years</option>
-          </select>
+          <select id="div-year" onchange="renderDividends()" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:4px 8px"><option value="">All Years</option></select>
           <button class="btn btn-ghost" style="padding:4px 10px;width:auto;font-size:10px" onclick="loadDividends()">&#8635; Refresh</button>
           <button class="btn btn-green" style="padding:4px 12px;width:auto;font-size:10px" onclick="showDividendModal()">+ Declare Dividend</button>
         </div>
@@ -1210,34 +1154,24 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
     </div>
     <div id="div-list"></div>
   </div>
-
   <!-- Dividend modal -->
   <div id="dividend-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1001;display:flex;align-items:center;justify-content:center">
     <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:4px;padding:24px;width:100%;max-width:480px">
       <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--acc);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px" id="div-modal-title">Declare Dividend</div>
       <input type="hidden" id="dv-edit-id">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="field"><label>Declaring Entity</label><select id="dv-from" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option><option>CTC Hergott Holdings Ltd</option>
-        </select></div>
-        <div class="field"><label>Recipient</label><select id="dv-to" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option>Chris Hergott Personal</option><option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option>
-        </select></div>
+        <div class="field"><label>Declaring Entity</label><select id="dv-from" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option><option>CTC Hergott Holdings Ltd</option></select></div>
+        <div class="field"><label>Recipient</label><select id="dv-to" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option>Chris Hergott Personal</option><option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option></select></div>
         <div class="field"><label>Declaration Date</label><input type="date" id="dv-declared" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Payment Date</label><input type="date" id="dv-paid" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Gross Amount (CAD)</label><input type="number" id="dv-gross" min="0" step="0.01" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field"><label>Withholding Tax (CAD)</label><input type="number" id="dv-wht" min="0" step="0.01" placeholder="0.00" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-        <div class="field"><label>Dividend Type</label><select id="dv-type" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option>Eligible</option><option>Non-Eligible (Ordinary)</option><option>Capital Dividend</option><option>Intercompany</option>
-        </select></div>
+        <div class="field"><label>Dividend Type</label><select id="dv-type" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option>Eligible</option><option>Non-Eligible (Ordinary)</option><option>Capital Dividend</option><option>Intercompany</option></select></div>
         <div class="field"><label>Tax Year</label><input type="number" id="dv-year" min="2020" max="2035" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field" style="grid-column:1/-1"><label>Notes / Board Resolution Ref</label><input type="text" id="dv-notes" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
       </div>
       <div id="div-modal-error" class="hidden" style="font-family:var(--mono);font-size:10px;color:var(--red);margin:8px 0"></div>
-      <div class="btn-row" style="margin-top:4px">
-        <button class="btn btn-ghost" onclick="closeDividendModal()">Cancel</button>
-        <button class="btn btn-green" onclick="saveDividend()">Save</button>
-      </div>
+      <div class="btn-row" style="margin-top:4px"><button class="btn btn-ghost" onclick="closeDividendModal()">Cancel</button><button class="btn btn-green" onclick="saveDividend()">Save</button></div>
     </div>
   </div>
 
@@ -1247,13 +1181,8 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div class="card-title" style="margin-bottom:0">Budget vs. Actual</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-          <select id="bg-entity" onchange="renderBudget()" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:4px 8px">
-            <option value="">All Entities</option>
-            <option>Chris Hergott Personal</option><option>Chris Hergott Holdings Ltd</option>
-            <option>C&amp;H Hergott Capital Inc</option><option>CTC Hergott Holdings Ltd</option>
-          </select>
-          <select id="bg-year" onchange="renderBudget()" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:4px 8px">
-          </select>
+          <select id="bg-entity" onchange="renderBudget()" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:4px 8px"><option value="">All Entities</option><option>Chris Hergott Personal</option><option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option><option>CTC Hergott Holdings Ltd</option></select>
+          <select id="bg-year" onchange="renderBudget()" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:4px 8px"></select>
           <button class="btn btn-ghost" style="padding:4px 10px;width:auto;font-size:10px" onclick="loadBudget()">&#8635; Refresh</button>
           <button class="btn btn-green" style="padding:4px 12px;width:auto;font-size:10px" onclick="showBudgetLineModal()">+ Add Budget Line</button>
         </div>
@@ -1263,40 +1192,27 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
     <div class="card" id="budget-table-card">
       <div class="card-title">Budget Lines</div>
       <div style="overflow-x:auto">
-        <table class="ledger-table">
-          <thead><tr>
-            <th>Category</th><th>Type</th><th style="text-align:right">Budget</th>
-            <th style="text-align:right">Actual</th><th style="text-align:right">Variance</th><th style="text-align:right">% Used</th><th></th>
-          </tr></thead>
-          <tbody id="budget-tbody"></tbody>
-        </table>
-        <div id="budget-empty" class="hidden" style="text-align:center;padding:24px;font-family:var(--mono);font-size:11px;color:var(--txt3)">No budget lines set. Add budget lines to track against actuals.</div>
+        <table class="ledger-table"><thead><tr><th>Category</th><th>Type</th><th style="text-align:right">Budget</th><th style="text-align:right">Actual</th><th style="text-align:right">Variance</th><th style="text-align:right">% Used</th><th></th></tr></thead>
+        <tbody id="budget-tbody"></tbody></table>
+        <div id="budget-empty" class="hidden" style="text-align:center;padding:24px;font-family:var(--mono);font-size:11px;color:var(--txt3)">No budget lines set.</div>
       </div>
     </div>
   </div>
-
   <!-- Budget line modal -->
   <div id="budget-line-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1001;display:flex;align-items:center;justify-content:center">
     <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:4px;padding:24px;width:100%;max-width:440px">
       <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--acc);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px" id="bg-modal-title">Add Budget Line</div>
       <input type="hidden" id="bg-edit-id">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="field"><label>Entity</label><select id="bgl-entity" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option>Chris Hergott Personal</option><option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option><option>CTC Hergott Holdings Ltd</option>
-        </select></div>
+        <div class="field"><label>Entity</label><select id="bgl-entity" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option>Chris Hergott Personal</option><option>Chris Hergott Holdings Ltd</option><option>C&amp;H Hergott Capital Inc</option><option>CTC Hergott Holdings Ltd</option></select></div>
         <div class="field"><label>Year</label><input type="number" id="bgl-year" min="2024" max="2035" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-        <div class="field"><label>Category</label><input type="text" id="bgl-cat" placeholder="e.g. Property Tax, Insurance" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
-        <div class="field"><label>Type</label><select id="bgl-type" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%">
-          <option value="expense">Expense</option><option value="income">Income</option>
-        </select></div>
+        <div class="field"><label>Category</label><input type="text" id="bgl-cat" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
+        <div class="field"><label>Type</label><select id="bgl-type" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"><option value="expense">Expense</option><option value="income">Income</option></select></div>
         <div class="field" style="grid-column:1/-1"><label>Annual Budget Amount (CAD)</label><input type="number" id="bgl-amount" min="0" step="0.01" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
         <div class="field" style="grid-column:1/-1"><label>Notes (optional)</label><input type="text" id="bgl-notes" style="background:var(--surf2);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 9px;width:100%"></div>
       </div>
       <div id="bgl-modal-error" class="hidden" style="font-family:var(--mono);font-size:10px;color:var(--red);margin:8px 0"></div>
-      <div class="btn-row" style="margin-top:4px">
-        <button class="btn btn-ghost" onclick="closeBudgetLineModal()">Cancel</button>
-        <button class="btn btn-green" onclick="saveBudgetLine()">Save</button>
-      </div>
+      <div class="btn-row" style="margin-top:4px"><button class="btn btn-ghost" onclick="closeBudgetLineModal()">Cancel</button><button class="btn btn-green" onclick="saveBudgetLine()">Save</button></div>
     </div>
   </div>
 
@@ -1870,7 +1786,7 @@ let account = null;
 let graphToken = null;
 let apiKey = localStorage.getItem("hdm_api_key") || "";
 
-// ── Anthropic API wrapper ─────────────────────────────────────────────────────
+// ── Anthropic API ─────────────────────────────────────────────────────────────
 async function anthropicFetch(params) {
   if (!apiKey) { promptApiKey(); if (!apiKey) throw new Error("No API key set."); }
   const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -1888,9 +1804,9 @@ async function anthropicFetch(params) {
     if (response.status === 401) {
       localStorage.removeItem("hdm_api_key");
       apiKey = "";
-      throw new Error("Invalid API key (401). Re-enter your Anthropic API key.");
+      throw new Error("Invalid API key — please re-enter your Anthropic API key.");
     }
-    throw new Error("Anthropic API " + response.status + ": " + errText.slice(0, 200));
+    throw new Error("Anthropic API " + response.status + ": " + errText.slice(0, 300));
   }
   return response.json();
 }
@@ -2154,7 +2070,7 @@ Entity abbreviations for filenames:
 PROPERTY DOCUMENTS: Chris Hergott Holdings Ltd and C&H Hergott Capital Inc own rental properties.
 If a document relates to a specific rental property (invoice, lease, utility bill, insurance, property tax, permit), set subfolder to "__PROPERTIES__".
 Properties (active only): ${PROPERTIES.filter(p=>p.active).map(p => p.address).join(", ")}.
-Note: properties transferred from CHHL to C&H Cap around mid-2025. Before July 2025 → CHHL. After → C&H Cap. When in doubt use the entity name on the document. Only use ACTIVE properties (not sold ones) for new filings.
+Note: properties transferred from CHHL to C&H Cap around mid-2025. Before July 2025 → CHHL. After → C&H Cap. When in doubt use the entity name on the document.
 
 For suggestedFilename: use YYYY-MM-DD_EntityAbbrev_VendorShortName_DocType_Reference.pdf
 VendorShortName = short version of vendor/payee name, no spaces, hyphens if needed. Omit if no vendor.
@@ -2279,7 +2195,7 @@ function renderBatchReview() {
             ${PROPERTIES.map(p => {
               // Pre-select if Claude's description mentions this property
               const matches = a.description && a.description.includes(p.address.split(" ")[0]);
-              return `<option value="${p.address}" ${matches ? "selected" : ""}${!p.active ? " style=\"color:var(--txt3)\" disabled" : ""}>${p.address}${!p.active ? " (Sold — read-only)" : ""}</option>`;
+              return `<option value="${p.address}" ${matches ? "selected" : ""}${!p.active ? " style=\"color:var(--txt3)\" disabled" : ""}>${p.address}${!p.active ? " (Sold)" : ""}</option>`;
             }).join("")}
           </select>
         </div>
@@ -2814,8 +2730,7 @@ async function loadLedger() {
 }
 
 function switchTab(tab) {
-  const ALL_TABS = ["file","dash","ledger","financials","reconcile","gst","loans","quality","search","interco","alerts","rentroll","lots","shloans","taxinst","dividends","budget"];
-  ALL_TABS.forEach(t => {
+  ["file","dash","ledger","financials","reconcile","gst","loans","quality","search","interco","alerts","rentroll","lots","shloans","taxinst","dividends","budget"].forEach(t => {
     const btn = document.getElementById("tab-" + t);
     if (btn) btn.className = "nav-tab" + (t === tab ? " active" : "");
   });
@@ -3268,8 +3183,9 @@ function renderReconcile() {
   const txns = stmt.transactions || [];
   const stmtId = stmt.id || idx;
 
-  // Load saved reconciliation status from bank statement object (persisted in OneDrive)
-  reconStatus = stmt.reconStatus ? Object.assign({}, stmt.reconStatus) : {};
+  // Load saved reconciliation status for this statement
+  const savedStatus = JSON.parse(localStorage.getItem("recon_" + stmtId) || "{}");
+  reconStatus = savedStatus;
 
   // Summary
   const totalDebits = txns.reduce((s, t) => s + (t.debit || 0), 0);
@@ -3316,23 +3232,11 @@ function renderReconcile() {
   }).join("");
 }
 
-async function toggleRecon(stmtId, txIdx) {
+function toggleRecon(stmtId, txIdx) {
   const key = stmtId + "_" + txIdx;
   const current = reconStatus[key] || "pending";
   reconStatus[key] = current === "pending" ? "reconciled" : current === "reconciled" ? "unmatched" : "pending";
-  // Persist into bankStatement object and save to OneDrive
-  const stmt = bankStatements.find(s => (s.id || bankStatements.indexOf(s)) === stmtId);
-  if (stmt) {
-    stmt.reconStatus = reconStatus;
-    try {
-      const token = await getToken();
-      const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-      const bytes = new TextEncoder().encode(JSON.stringify(bankStatements, null, 2));
-      await fetch(`${GRAPH}/me/drive/items/${rootId}:/${BANK_STMT_FILE}:/content`, {
-        method: "PUT", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" }, body: bytes
-      });
-    } catch(e) { console.warn("Recon status save failed:", e.message); }
-  }
+  localStorage.setItem("recon_" + stmtId, JSON.stringify(reconStatus));
   renderReconcile();
 }
 
@@ -3602,7 +3506,7 @@ function linkToMatch(ledgerEntryId) {
   const stmtId = stmt.id || activeTxStmtIdx;
   const key = stmtId + "_" + activeTxIdx;
   reconStatus[key] = "reconciled";
-  /* recon status now persisted in bankStatements via OneDrive */
+  localStorage.setItem("recon_" + stmtId, JSON.stringify(reconStatus));
   closeTxModal();
   renderReconcile();
 }
@@ -3685,7 +3589,7 @@ async function submitTxEntry() {
     // Mark reconciled
     const key = stmtId + "_" + activeTxIdx;
     reconStatus[key] = noInvoice ? "unmatched" : "reconciled";
-    /* recon status now persisted in bankStatements via OneDrive */
+    localStorage.setItem("recon_" + stmtId, JSON.stringify(reconStatus));
 
     closeTxModal();
     renderReconcile();
@@ -4065,7 +3969,7 @@ async function confirmAutoReconcile() {
 
     // Save reconciliation status
     Object.assign(reconStatus, newReconStatus);
-    /* recon status now persisted in bankStatements via OneDrive */
+    localStorage.setItem("recon_" + stmtId, JSON.stringify(reconStatus));
 
     closeAutoRecon();
     renderReconcile();
@@ -4672,7 +4576,7 @@ async function runQualityCheck() {
     // Check for pending (unreconciled) transactions
     bankStatements.forEach(stmt => {
       const stmtId = stmt.id || bankStatements.indexOf(stmt);
-      const savedStatus = stmt.reconStatus || {};
+      const savedStatus = JSON.parse(localStorage.getItem("recon_" + stmtId) || "{}");
       const pending = (stmt.transactions || []).filter((_, i) => !savedStatus[stmtId + "_" + i] || savedStatus[stmtId + "_" + i] === "pending");
       if (pending.length > 3) {
         bsSection.items.push({
@@ -5698,7 +5602,7 @@ function renderDashboard() {
   let pendingRecon = 0;
   bankStatements.forEach(stmt => {
     const stmtId = stmt.id || bankStatements.indexOf(stmt);
-    const saved = stmt.reconStatus || {};
+    const saved = JSON.parse(localStorage.getItem("recon_" + stmtId) || "{}");
     pendingRecon += (stmt.transactions||[]).filter((_,i) => !saved[stmtId+"_"+i] || saved[stmtId+"_"+i] === "pending").length;
   });
 
@@ -5738,7 +5642,7 @@ function renderDashboard() {
     </div>
     <div class="summary-card" style="cursor:pointer" onclick="switchTab('rentroll')">
       <div class="summary-label">Active Tenants</div>
-      <div class="summary-value">${rentRollData.filter(t=>t.status==='active').length}</div>
+      <div class="summary-value">${rentRollData.filter(t=>t.status==="active").length}</div>
     </div>
     <div class="summary-card" style="cursor:pointer" onclick="switchTab('shloans')">
       <div class="summary-label">SH Loans Outstanding</div>
@@ -6130,11 +6034,10 @@ function resetApp() {
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// RENT ROLL MODULE
+// RENT ROLL
 // ═══════════════════════════════════════════════════════════════════════════════
 const RENTROLL_FILE = "rent_roll.json";
-let rentRollData = []; // array of tenant objects
-let rentRollPayments = {}; // { tenantId: [payments] } — stored inline in tenant
+let rentRollData = [];
 let activePaymentTenantId = null;
 
 async function loadRentRoll() {
@@ -6142,9 +6045,7 @@ async function loadRentRoll() {
   try {
     const token = await getToken();
     const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-    const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${RENTROLL_FILE}:/content`, {
-      headers: { Authorization: "Bearer " + token }
-    });
+    const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${RENTROLL_FILE}:/content`, { headers: { Authorization: "Bearer " + token } });
     rentRollData = r.ok ? await r.json() : [];
   } catch { rentRollData = []; }
   renderRentRoll();
@@ -6154,79 +6055,51 @@ async function saveRentRoll() {
   const token = await getToken();
   const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
   const bytes = new TextEncoder().encode(JSON.stringify(rentRollData, null, 2));
-  const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${RENTROLL_FILE}:/content`, {
-    method: "PUT", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" }, body: bytes
-  });
+  const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${RENTROLL_FILE}:/content`, { method: "PUT", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" }, body: bytes });
   if (!r.ok) throw new Error("Rent roll save failed: " + r.status);
 }
 
 function renderRentRoll() {
   const entityFilter = document.getElementById("rr-entity").value;
   const today = new Date();
-
   const tenants = rentRollData.filter(t => !entityFilter || t.entity === entityFilter);
   const active = tenants.filter(t => t.status === "active");
   const vacant = tenants.filter(t => t.status === "vacant");
   const totalRent = active.reduce((s, t) => s + (parseFloat(t.rent) || 0), 0);
   const totalDeposit = tenants.reduce((s, t) => s + (parseFloat(t.deposit) || 0), 0);
-
   document.getElementById("rr-summary").innerHTML = `
     <div class="summary-card"><div class="summary-label">Active Tenants</div><div class="summary-value pos">${active.length}</div></div>
     <div class="summary-card"><div class="summary-label">Vacant Units</div><div class="summary-value ${vacant.length>0?"neg":"pos"}">${vacant.length}</div></div>
     <div class="summary-card"><div class="summary-label">Monthly Rent Roll</div><div class="summary-value pos">$${totalRent.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
     <div class="summary-card"><div class="summary-label">Annual Revenue</div><div class="summary-value">$${(totalRent*12).toLocaleString("en-CA",{minimumFractionDigits:0})}</div></div>
-    <div class="summary-card"><div class="summary-label">Deposits Held</div><div class="summary-value">$${totalDeposit.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
-  `;
-
-  // Group by property
+    <div class="summary-card"><div class="summary-label">Deposits Held</div><div class="summary-value">$${totalDeposit.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>`;
+  if (!tenants.length) { document.getElementById("rr-properties").innerHTML = `<div class="card"><div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-align:center;padding:20px">No tenants yet.</div></div>`; return; }
   const byProp = {};
-  tenants.forEach(t => {
-    const k = t.property || "Unknown Property";
-    if (!byProp[k]) byProp[k] = [];
-    byProp[k].push(t);
-  });
-
-  if (!tenants.length) {
-    document.getElementById("rr-properties").innerHTML = `<div class="card"><div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-align:center;padding:20px">No tenants yet. Add a tenant to get started.</div></div>`;
-    return;
-  }
-
+  tenants.forEach(t => { const k = t.property || "Unknown"; if (!byProp[k]) byProp[k] = []; byProp[k].push(t); });
   document.getElementById("rr-properties").innerHTML = Object.entries(byProp).map(([prop, list]) => {
     const propRent = list.filter(t=>t.status==="active").reduce((s,t)=>s+(parseFloat(t.rent)||0),0);
-    return `<div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div class="card-title" style="margin-bottom:0">${prop}</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--grn)">$${propRent.toLocaleString("en-CA",{minimumFractionDigits:2})}/mo</div>
-      </div>
-      ${list.map(t => {
-        const statusColor = t.status==="active"?"var(--grn)":t.status==="vacant"?"var(--red)":t.status==="notice"?"var(--acc)":"var(--txt3)";
-        const leaseEnd = t.leaseEnd ? new Date(t.leaseEnd) : null;
-        const daysToEnd = leaseEnd ? Math.round((leaseEnd - today) / 86400000) : null;
-        const endWarn = daysToEnd !== null && daysToEnd <= 90 && daysToEnd >= 0
-          ? `<span style="font-family:var(--mono);font-size:9px;color:var(--acc);margin-left:6px">⚠ Lease ends in ${daysToEnd}d</span>` : "";
-        const lastPay = (t.payments||[]).slice(-1)[0];
-        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)">
-          <div>
-            <div style="font-family:var(--mono);font-size:11px;color:var(--txt);font-weight:600">${t.name}${t.unit?` · ${t.unit}`:""}</div>
-            <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:2px">
-              <span style="color:${statusColor}">${t.status.toUpperCase()}</span>
-              ${t.leaseStart?` · Start: ${t.leaseStart}`:""}
-              ${t.leaseEnd?` · End: ${t.leaseEnd}`:" · Month-to-Month"}${endWarn}
-            </div>
-            ${lastPay?`<div style="font-family:var(--mono);font-size:9px;color:var(--grn);margin-top:2px">Last payment: ${lastPay.date} · $${parseFloat(lastPay.amount).toLocaleString("en-CA",{minimumFractionDigits:2})}</div>`:""}
-            ${t.contact?`<div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:2px">${t.contact}</div>`:""}
+    return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="card-title" style="margin-bottom:0">${prop}</div><div style="font-family:var(--mono);font-size:10px;color:var(--grn)">$${propRent.toLocaleString("en-CA",{minimumFractionDigits:2})}/mo</div></div>
+    ${list.map(t => {
+      const sc = t.status==="active"?"var(--grn)":t.status==="vacant"?"var(--red)":t.status==="notice"?"var(--acc)":"var(--txt3)";
+      const leaseEnd = t.leaseEnd ? new Date(t.leaseEnd) : null;
+      const daysToEnd = leaseEnd ? Math.round((leaseEnd-today)/86400000) : null;
+      const endWarn = daysToEnd!==null&&daysToEnd<=90&&daysToEnd>=0 ? `<span style="font-family:var(--mono);font-size:9px;color:var(--acc);margin-left:6px">⚠ Lease ends in ${daysToEnd}d</span>` : "";
+      const lastPay = (t.payments||[]).slice(-1)[0];
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)">
+        <div><div style="font-family:var(--mono);font-size:11px;color:var(--txt);font-weight:600">${t.name}${t.unit?` · ${t.unit}`:""}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:2px"><span style="color:${sc}">${t.status.toUpperCase()}</span>${t.leaseEnd?` · End: ${t.leaseEnd}`:" · Month-to-Month"}${endWarn}</div>
+        ${lastPay?`<div style="font-family:var(--mono);font-size:9px;color:var(--grn);margin-top:2px">Last: ${lastPay.date} · $${parseFloat(lastPay.amount).toLocaleString("en-CA",{minimumFractionDigits:2})}</div>`:""}
+        ${t.contact?`<div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:2px">${t.contact}</div>`:""}
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--grn)">$${parseFloat(t.rent||0).toLocaleString("en-CA",{minimumFractionDigits:2})}/mo</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3)">Dep: $${parseFloat(t.deposit||0).toLocaleString("en-CA",{minimumFractionDigits:2})}</div>
+          <div style="display:flex;gap:4px;margin-top:6px;justify-content:flex-end">
+            <button class="btn btn-ghost" style="padding:2px 8px;width:auto;font-size:9px" onclick="showTenantModal('${t.id}')">Edit</button>
+            <button class="btn btn-ghost" style="padding:2px 8px;width:auto;font-size:9px" onclick="openPaymentLog('${t.id}','${t.name.replace(/'/g,"&#39;")}')">Payments</button>
           </div>
-          <div style="text-align:right;flex-shrink:0">
-            <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--grn)">$${parseFloat(t.rent||0).toLocaleString("en-CA",{minimumFractionDigits:2})}/mo</div>
-            <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:2px">Dep: $${parseFloat(t.deposit||0).toLocaleString("en-CA",{minimumFractionDigits:2})}</div>
-            <div style="display:flex;gap:4px;margin-top:6px;justify-content:flex-end">
-              <button class="btn btn-ghost" style="padding:2px 8px;width:auto;font-size:9px" onclick="showTenantModal('${t.id}')">Edit</button>
-              <button class="btn btn-ghost" style="padding:2px 8px;width:auto;font-size:9px" onclick="openPaymentLog('${t.id}','${t.name.replace(/'/g,"&#39;")}')">Payments</button>
-            </div>
-          </div>
-        </div>`;
-      }).join("")}
-    </div>`;
+        </div></div>`;
+    }).join("")}</div>`;
   }).join("");
 }
 
@@ -6236,119 +6109,72 @@ function showTenantModal(editId) {
   document.getElementById("tenant-modal-error").classList.add("hidden");
   if (editId) {
     const t = rentRollData.find(x => x.id === editId);
-    if (t) {
-      document.getElementById("tn-name").value = t.name || "";
-      document.getElementById("tn-property").value = t.property || "";
-      document.getElementById("tn-unit").value = t.unit || "";
-      document.getElementById("tn-entity").value = t.entity || "";
-      document.getElementById("tn-rent").value = t.rent || "";
-      document.getElementById("tn-start").value = t.leaseStart || "";
-      document.getElementById("tn-end").value = t.leaseEnd || "";
-      document.getElementById("tn-deposit").value = t.deposit || "";
-      document.getElementById("tn-dueday").value = t.dueDay || 1;
-      document.getElementById("tn-contact").value = t.contact || "";
-      document.getElementById("tn-status").value = t.status || "active";
-      document.getElementById("tn-notes").value = t.notes || "";
-    }
-  } else {
-    ["tn-name","tn-unit","tn-rent","tn-start","tn-end","tn-deposit","tn-contact","tn-notes"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("tn-dueday").value = 1;
-    document.getElementById("tn-status").value = "active";
-  }
-  document.getElementById("tenant-modal").classList.remove("hidden");
-  document.getElementById("tenant-modal").style.display = "flex";
+    if (t) { document.getElementById("tn-name").value=t.name||""; document.getElementById("tn-property").value=t.property||""; document.getElementById("tn-unit").value=t.unit||""; document.getElementById("tn-entity").value=t.entity||""; document.getElementById("tn-rent").value=t.rent||""; document.getElementById("tn-start").value=t.leaseStart||""; document.getElementById("tn-end").value=t.leaseEnd||""; document.getElementById("tn-deposit").value=t.deposit||""; document.getElementById("tn-dueday").value=t.dueDay||1; document.getElementById("tn-contact").value=t.contact||""; document.getElementById("tn-status").value=t.status||"active"; document.getElementById("tn-notes").value=t.notes||""; }
+  } else { ["tn-name","tn-unit","tn-rent","tn-start","tn-end","tn-deposit","tn-contact","tn-notes"].forEach(id=>document.getElementById(id).value=""); document.getElementById("tn-dueday").value=1; document.getElementById("tn-status").value="active"; }
+  document.getElementById("tenant-modal").classList.remove("hidden"); document.getElementById("tenant-modal").style.display="flex";
 }
-function closeTenantModal() { document.getElementById("tenant-modal").classList.add("hidden"); document.getElementById("tenant-modal").style.display = "none"; }
+function closeTenantModal() { document.getElementById("tenant-modal").classList.add("hidden"); document.getElementById("tenant-modal").style.display="none"; }
 
 async function saveTenant() {
   const errEl = document.getElementById("tenant-modal-error");
   const name = document.getElementById("tn-name").value.trim();
-  if (!name) { errEl.textContent = "Name is required."; errEl.classList.remove("hidden"); return; }
+  if (!name) { errEl.textContent="Name is required."; errEl.classList.remove("hidden"); return; }
   const editId = document.getElementById("tenant-edit-id").value;
-  const tenant = {
-    id: editId || (Date.now() + "-" + Math.random().toString(36).slice(2,6)),
-    name, property: document.getElementById("tn-property").value,
-    unit: document.getElementById("tn-unit").value.trim(),
-    entity: document.getElementById("tn-entity").value,
-    rent: parseFloat(document.getElementById("tn-rent").value) || 0,
-    leaseStart: document.getElementById("tn-start").value,
-    leaseEnd: document.getElementById("tn-end").value,
-    deposit: parseFloat(document.getElementById("tn-deposit").value) || 0,
-    dueDay: parseInt(document.getElementById("tn-dueday").value) || 1,
-    contact: document.getElementById("tn-contact").value.trim(),
-    status: document.getElementById("tn-status").value,
-    notes: document.getElementById("tn-notes").value.trim(),
-    payments: editId ? (rentRollData.find(x=>x.id===editId)||{}).payments || [] : []
-  };
-  const idx = editId ? rentRollData.findIndex(x => x.id === editId) : -1;
-  if (idx >= 0) rentRollData[idx] = tenant; else rentRollData.push(tenant);
-  try { await saveRentRoll(); closeTenantModal(); renderRentRoll(); }
-  catch(e) { errEl.textContent = "Save failed: " + e.message; errEl.classList.remove("hidden"); }
+  const tenant = { id: editId||(Date.now()+"-"+Math.random().toString(36).slice(2,6)), name, property:document.getElementById("tn-property").value, unit:document.getElementById("tn-unit").value.trim(), entity:document.getElementById("tn-entity").value, rent:parseFloat(document.getElementById("tn-rent").value)||0, leaseStart:document.getElementById("tn-start").value, leaseEnd:document.getElementById("tn-end").value, deposit:parseFloat(document.getElementById("tn-deposit").value)||0, dueDay:parseInt(document.getElementById("tn-dueday").value)||1, contact:document.getElementById("tn-contact").value.trim(), status:document.getElementById("tn-status").value, notes:document.getElementById("tn-notes").value.trim(), payments:editId?(rentRollData.find(x=>x.id===editId)||{}).payments||[]:{} };
+  const idx = editId ? rentRollData.findIndex(x=>x.id===editId) : -1;
+  if (idx>=0) rentRollData[idx]=tenant; else rentRollData.push(tenant);
+  try { await saveRentRoll(); closeTenantModal(); renderRentRoll(); } catch(e) { errEl.textContent="Save failed: "+e.message; errEl.classList.remove("hidden"); }
 }
 
 function openPaymentLog(tenantId, tenantName) {
   activePaymentTenantId = tenantId;
   document.getElementById("rr-pay-tenant-name").textContent = tenantName;
-  const tenant = rentRollData.find(t => t.id === tenantId);
-  const payments = (tenant && tenant.payments) || [];
-  const tbody = document.getElementById("rr-pay-tbody");
-  document.getElementById("rr-pay-empty").classList.toggle("hidden", payments.length > 0);
-  tbody.innerHTML = payments.slice().reverse().map((p, ri) => {
-    const i = payments.length - 1 - ri;
-    return `<tr>
-      <td>${p.date}</td><td>${p.period||"—"}</td>
-      <td style="text-align:right;color:var(--grn)">$${parseFloat(p.amount).toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
-      <td>${p.method||"—"}</td><td style="color:var(--txt3)">${p.notes||""}</td>
-      <td><span style="color:var(--red);cursor:pointer;font-size:10px" onclick="deleteRentPayment('${tenantId}',${i})">✕</span></td>
-    </tr>`;
+  const tenant = rentRollData.find(t=>t.id===tenantId);
+  const payments = (tenant&&tenant.payments)||[];
+  document.getElementById("rr-pay-empty").classList.toggle("hidden", payments.length>0);
+  document.getElementById("rr-pay-tbody").innerHTML = payments.slice().reverse().map((p,ri)=>{
+    const i = payments.length-1-ri;
+    return `<tr><td>${p.date}</td><td>${p.period||"—"}</td><td style="text-align:right;color:var(--grn)">$${parseFloat(p.amount).toLocaleString("en-CA",{minimumFractionDigits:2})}</td><td>${p.method||"—"}</td><td style="color:var(--txt3)">${p.notes||""}</td><td><span style="color:var(--red);cursor:pointer;font-size:10px" onclick="deleteRentPayment('${tenantId}',${i})">✕</span></td></tr>`;
   }).join("");
   document.getElementById("rr-payments-card").classList.remove("hidden");
 }
 
 function showRentPayModal() {
-  document.getElementById("rp-tenant-id").value = activePaymentTenantId || "";
-  document.getElementById("rp-date").value = new Date().toISOString().slice(0,10);
-  document.getElementById("rp-period").value = new Date().toISOString().slice(0,7);
-  const tenant = rentRollData.find(t => t.id === activePaymentTenantId);
-  document.getElementById("rp-amount").value = tenant ? (tenant.rent || "") : "";
-  document.getElementById("rp-notes").value = "";
+  document.getElementById("rp-tenant-id").value=activePaymentTenantId||"";
+  document.getElementById("rp-date").value=new Date().toISOString().slice(0,10);
+  document.getElementById("rp-period").value=new Date().toISOString().slice(0,7);
+  const tenant = rentRollData.find(t=>t.id===activePaymentTenantId);
+  document.getElementById("rp-amount").value=tenant?(tenant.rent||""):"";
+  document.getElementById("rp-notes").value="";
   document.getElementById("rp-error").classList.add("hidden");
-  document.getElementById("rent-pay-modal").classList.remove("hidden");
-  document.getElementById("rent-pay-modal").style.display = "flex";
+  document.getElementById("rent-pay-modal").classList.remove("hidden"); document.getElementById("rent-pay-modal").style.display="flex";
 }
-function closeRentPayModal() { document.getElementById("rent-pay-modal").classList.add("hidden"); document.getElementById("rent-pay-modal").style.display = "none"; }
+function closeRentPayModal() { document.getElementById("rent-pay-modal").classList.add("hidden"); document.getElementById("rent-pay-modal").style.display="none"; }
 
 async function saveRentPayment() {
-  const errEl = document.getElementById("rp-error");
-  const tenantId = document.getElementById("rp-tenant-id").value;
-  const amount = parseFloat(document.getElementById("rp-amount").value);
-  if (!amount || amount <= 0) { errEl.textContent = "Amount is required."; errEl.classList.remove("hidden"); return; }
-  const payment = {
-    date: document.getElementById("rp-date").value,
-    period: document.getElementById("rp-period").value,
-    amount, method: document.getElementById("rp-method").value,
-    notes: document.getElementById("rp-notes").value.trim()
-  };
-  const tenant = rentRollData.find(t => t.id === tenantId);
-  if (!tenant) { errEl.textContent = "Tenant not found."; errEl.classList.remove("hidden"); return; }
-  if (!tenant.payments) tenant.payments = [];
+  const errEl=document.getElementById("rp-error");
+  const tenantId=document.getElementById("rp-tenant-id").value;
+  const amount=parseFloat(document.getElementById("rp-amount").value);
+  if (!amount||amount<=0) { errEl.textContent="Amount is required."; errEl.classList.remove("hidden"); return; }
+  const payment={date:document.getElementById("rp-date").value,period:document.getElementById("rp-period").value,amount,method:document.getElementById("rp-method").value,notes:document.getElementById("rp-notes").value.trim()};
+  const tenant=rentRollData.find(t=>t.id===tenantId);
+  if (!tenant) { errEl.textContent="Tenant not found."; errEl.classList.remove("hidden"); return; }
+  if (!tenant.payments) tenant.payments=[];
   tenant.payments.push(payment);
-  tenant.payments.sort((a,b) => a.date > b.date ? 1 : -1);
-  try { await saveRentRoll(); closeRentPayModal(); openPaymentLog(tenantId, tenant.name); renderRentRoll(); }
-  catch(e) { errEl.textContent = "Save failed: " + e.message; errEl.classList.remove("hidden"); }
+  tenant.payments.sort((a,b)=>a.date>b.date?1:-1);
+  try { await saveRentRoll(); closeRentPayModal(); openPaymentLog(tenantId,tenant.name); renderRentRoll(); } catch(e) { errEl.textContent="Save failed: "+e.message; errEl.classList.remove("hidden"); }
 }
 
 async function deleteRentPayment(tenantId, idx) {
   if (!confirm("Delete this payment?")) return;
-  const tenant = rentRollData.find(t => t.id === tenantId);
-  if (!tenant || !tenant.payments) return;
-  tenant.payments.splice(idx, 1);
-  await saveRentRoll();
-  openPaymentLog(tenantId, tenant.name);
+  const tenant=rentRollData.find(t=>t.id===tenantId);
+  if (!tenant||!tenant.payments) return;
+  tenant.payments.splice(idx,1);
+  await saveRentRoll(); openPaymentLog(tenantId,tenant.name);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// CTC LOT TRACKER MODULE
+// CTC LOT TRACKER
 // ═══════════════════════════════════════════════════════════════════════════════
 const LOTS_FILE = "ctc_lots.json";
 let lotsData = [];
@@ -6356,202 +6182,118 @@ let lotsData = [];
 async function loadLots() {
   if (!account) return;
   try {
-    const token = await getToken();
-    const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-    const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${LOTS_FILE}:/content`, {
-      headers: { Authorization: "Bearer " + token }
-    });
-    lotsData = r.ok ? await r.json() : [];
-  } catch { lotsData = []; }
+    const token=await getToken(); const rootId=await ensureFolder(token,"root",ROOT_FOLDER);
+    const r=await fetch(`${GRAPH}/me/drive/items/${rootId}:/${LOTS_FILE}:/content`,{headers:{Authorization:"Bearer "+token}});
+    lotsData=r.ok?await r.json():[];
+  } catch { lotsData=[]; }
   renderLots();
 }
 
 async function saveLots() {
-  const token = await getToken();
-  const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-  const bytes = new TextEncoder().encode(JSON.stringify(lotsData, null, 2));
-  const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${LOTS_FILE}:/content`, {
-    method: "PUT", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" }, body: bytes
-  });
-  if (!r.ok) throw new Error("Lots save failed: " + r.status);
+  const token=await getToken(); const rootId=await ensureFolder(token,"root",ROOT_FOLDER);
+  const bytes=new TextEncoder().encode(JSON.stringify(lotsData,null,2));
+  const r=await fetch(`${GRAPH}/me/drive/items/${rootId}:/${LOTS_FILE}:/content`,{method:"PUT",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:bytes});
+  if (!r.ok) throw new Error("Lots save failed: "+r.status);
 }
 
-const LOT_STATUS_COLORS = { available:"var(--grn)", conditional:"var(--acc)", sold:"var(--txt3)", reserved:"#7eb8f7", development:"var(--txt2)" };
+const LOT_STATUS_COLORS={available:"var(--grn)",conditional:"var(--acc)",sold:"var(--txt3)",reserved:"#7eb8f7",development:"var(--txt2)"};
 
 function renderLots() {
-  const statusFilter = document.getElementById("lt-filter-status").value;
-  const lots = statusFilter ? lotsData.filter(l => l.status === statusFilter) : lotsData;
-  const sold = lotsData.filter(l => l.status === "sold");
-  const avail = lotsData.filter(l => l.status === "available");
-  const cond = lotsData.filter(l => l.status === "conditional");
-  const totalRevenue = sold.reduce((s,l) => s + (parseFloat(l.salePrice)||0), 0);
-  const totalDevCost = lotsData.reduce((s,l) => s + (parseFloat(l.devCost)||0), 0);
-  const netProfit = totalRevenue - sold.reduce((s,l) => s + (parseFloat(l.devCost)||0), 0);
-  const totalListValue = avail.reduce((s,l) => s + (parseFloat(l.listPrice)||0), 0);
-
-  document.getElementById("lots-summary").innerHTML = `
+  const sf=document.getElementById("lt-filter-status").value;
+  const lots=sf?lotsData.filter(l=>l.status===sf):lotsData;
+  const sold=lotsData.filter(l=>l.status==="sold"); const avail=lotsData.filter(l=>l.status==="available"); const cond=lotsData.filter(l=>l.status==="conditional");
+  const totalRev=sold.reduce((s,l)=>s+(parseFloat(l.salePrice)||0),0);
+  const netProfit=totalRev-sold.reduce((s,l)=>s+(parseFloat(l.devCost)||0),0);
+  const totalListVal=avail.reduce((s,l)=>s+(parseFloat(l.listPrice)||0),0);
+  document.getElementById("lots-summary").innerHTML=`
     <div class="summary-card"><div class="summary-label">Total Lots</div><div class="summary-value">${lotsData.length}</div></div>
     <div class="summary-card"><div class="summary-label">Available</div><div class="summary-value pos">${avail.length}</div></div>
     <div class="summary-card"><div class="summary-label">Conditional</div><div class="summary-value acc">${cond.length}</div></div>
     <div class="summary-card"><div class="summary-label">Sold</div><div class="summary-value">${sold.length}</div></div>
-    <div class="summary-card"><div class="summary-label">Sale Revenue</div><div class="summary-value pos">$${totalRevenue.toLocaleString("en-CA",{minimumFractionDigits:0})}</div></div>
+    <div class="summary-card"><div class="summary-label">Sale Revenue</div><div class="summary-value pos">$${totalRev.toLocaleString("en-CA",{minimumFractionDigits:0})}</div></div>
     <div class="summary-card"><div class="summary-label">Net Profit (Sold)</div><div class="summary-value ${netProfit>=0?"pos":"neg"}">$${netProfit.toLocaleString("en-CA",{minimumFractionDigits:0})}</div></div>
-    <div class="summary-card"><div class="summary-label">Inventory Value (List)</div><div class="summary-value">$${totalListValue.toLocaleString("en-CA",{minimumFractionDigits:0})}</div></div>
-    <div class="summary-card"><div class="summary-label">Total Dev Cost</div><div class="summary-value neg">$${totalDevCost.toLocaleString("en-CA",{minimumFractionDigits:0})}</div></div>
-  `;
-
-  if (!lots.length) {
-    document.getElementById("lots-list").innerHTML = `<div class="card"><div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-align:center;padding:20px">No lots found. Add lots to track your subdivision inventory.</div></div>`;
-    return;
-  }
-
-  // Group by subdivision
-  const bySub = {};
-  lots.forEach(l => { const k = l.subdivision || "General"; if (!bySub[k]) bySub[k] = []; bySub[k].push(l); });
-
-  document.getElementById("lots-list").innerHTML = Object.entries(bySub).map(([sub, list]) => `
-    <div class="card">
-      <div class="card-title">${sub}</div>
-      <div style="overflow-x:auto">
-        <table class="ledger-table">
-          <thead><tr><th>Lot</th><th>Size</th><th>Status</th><th style="text-align:right">List Price</th><th style="text-align:right">Sale Price</th><th style="text-align:right">Dev Cost</th><th style="text-align:right">Net</th><th>Buyer</th><th>Sale Date</th><th></th></tr></thead>
-          <tbody>${list.map(l => {
-            const net = (parseFloat(l.salePrice)||0) - (parseFloat(l.devCost)||0);
-            const sc = LOT_STATUS_COLORS[l.status] || "var(--txt3)";
-            return `<tr>
-              <td style="font-weight:600">${l.lotId}</td>
-              <td>${l.size||"—"}</td>
-              <td><span style="color:${sc};font-family:var(--mono);font-size:9px;text-transform:uppercase">${l.status}</span></td>
-              <td style="text-align:right">${l.listPrice?"$"+parseFloat(l.listPrice).toLocaleString("en-CA",{minimumFractionDigits:0}):"—"}</td>
-              <td style="text-align:right;color:var(--grn)">${l.salePrice?"$"+parseFloat(l.salePrice).toLocaleString("en-CA",{minimumFractionDigits:0}):"—"}</td>
-              <td style="text-align:right;color:var(--red)">${l.devCost?"$"+parseFloat(l.devCost).toLocaleString("en-CA",{minimumFractionDigits:0}):"—"}</td>
-              <td style="text-align:right;color:${net>=0?"var(--grn)":"var(--red)"}">${l.salePrice?"$"+net.toLocaleString("en-CA",{minimumFractionDigits:0}):"—"}</td>
-              <td>${l.buyer||"—"}</td>
-              <td>${l.saleDate||"—"}</td>
-              <td>
-                <button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px" onclick="showLotModal('${l.id}')">Edit</button>
-                <button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px;color:var(--red)" onclick="deleteLot('${l.id}')">✕</button>
-              </td>
-            </tr>`;
-          }).join("")}</tbody>
-        </table>
-      </div>
-    </div>`).join("");
+    <div class="summary-card"><div class="summary-label">Inventory Value</div><div class="summary-value">$${totalListVal.toLocaleString("en-CA",{minimumFractionDigits:0})}</div></div>`;
+  if (!lots.length) { document.getElementById("lots-list").innerHTML=`<div class="card"><div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-align:center;padding:20px">No lots found.</div></div>`; return; }
+  const bySub={};
+  lots.forEach(l=>{const k=l.subdivision||"General";if(!bySub[k])bySub[k]=[];bySub[k].push(l);});
+  document.getElementById("lots-list").innerHTML=Object.entries(bySub).map(([sub,list])=>`
+    <div class="card"><div class="card-title">${sub}</div><div style="overflow-x:auto">
+      <table class="ledger-table"><thead><tr><th>Lot</th><th>Size</th><th>Status</th><th style="text-align:right">List</th><th style="text-align:right">Sale</th><th style="text-align:right">Dev Cost</th><th style="text-align:right">Net</th><th>Buyer</th><th>Sale Date</th><th></th></tr></thead>
+      <tbody>${list.map(l=>{
+        const net=(parseFloat(l.salePrice)||0)-(parseFloat(l.devCost)||0);
+        const sc=LOT_STATUS_COLORS[l.status]||"var(--txt3)";
+        return `<tr><td style="font-weight:600">${l.lotId}</td><td>${l.size||"—"}</td><td><span style="color:${sc};font-family:var(--mono);font-size:9px;text-transform:uppercase">${l.status}</span></td>
+          <td style="text-align:right">${l.listPrice?"$"+parseFloat(l.listPrice).toLocaleString("en-CA",{minimumFractionDigits:0}):"—"}</td>
+          <td style="text-align:right;color:var(--grn)">${l.salePrice?"$"+parseFloat(l.salePrice).toLocaleString("en-CA",{minimumFractionDigits:0}):"—"}</td>
+          <td style="text-align:right;color:var(--red)">${l.devCost?"$"+parseFloat(l.devCost).toLocaleString("en-CA",{minimumFractionDigits:0}):"—"}</td>
+          <td style="text-align:right;color:${net>=0?"var(--grn)":"var(--red)"}">${l.salePrice?"$"+net.toLocaleString("en-CA",{minimumFractionDigits:0}):"—"}</td>
+          <td>${l.buyer||"—"}</td><td>${l.saleDate||"—"}</td>
+          <td><button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px" onclick="showLotModal('${l.id}')">Edit</button>
+          <button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px;color:var(--red)" onclick="deleteLot('${l.id}')">✕</button></td></tr>`;
+      }).join("")}</tbody></table></div></div>`).join("");
 }
 
 function showLotModal(editId) {
-  document.getElementById("lot-modal-title").textContent = editId ? "Edit Lot" : "Add Lot";
-  document.getElementById("lot-edit-id").value = editId || "";
+  document.getElementById("lot-modal-title").textContent=editId?"Edit Lot":"Add Lot";
+  document.getElementById("lot-edit-id").value=editId||"";
   document.getElementById("lot-modal-error").classList.add("hidden");
-  if (editId) {
-    const l = lotsData.find(x => x.id === editId);
-    if (l) {
-      document.getElementById("lt-id-input").value = l.lotId || "";
-      document.getElementById("lt-sub").value = l.subdivision || "";
-      document.getElementById("lt-status").value = l.status || "available";
-      document.getElementById("lt-size").value = l.size || "";
-      document.getElementById("lt-listprice").value = l.listPrice || "";
-      document.getElementById("lt-saleprice").value = l.salePrice || "";
-      document.getElementById("lt-saledate").value = l.saleDate || "";
-      document.getElementById("lt-buyer").value = l.buyer || "";
-      document.getElementById("lt-devcost").value = l.devCost || "";
-      document.getElementById("lt-transfer").value = l.transferDate || "";
-      document.getElementById("lt-notes").value = l.notes || "";
-    }
-  } else {
-    ["lt-id-input","lt-sub","lt-size","lt-listprice","lt-saleprice","lt-saledate","lt-buyer","lt-devcost","lt-transfer","lt-notes"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("lt-status").value = "available";
-  }
-  document.getElementById("lot-modal").classList.remove("hidden");
-  document.getElementById("lot-modal").style.display = "flex";
+  if (editId) { const l=lotsData.find(x=>x.id===editId); if(l){document.getElementById("lt-id-input").value=l.lotId||"";document.getElementById("lt-sub").value=l.subdivision||"";document.getElementById("lt-status").value=l.status||"available";document.getElementById("lt-size").value=l.size||"";document.getElementById("lt-listprice").value=l.listPrice||"";document.getElementById("lt-saleprice").value=l.salePrice||"";document.getElementById("lt-saledate").value=l.saleDate||"";document.getElementById("lt-buyer").value=l.buyer||"";document.getElementById("lt-devcost").value=l.devCost||"";document.getElementById("lt-transfer").value=l.transferDate||"";document.getElementById("lt-notes").value=l.notes||"";} }
+  else { ["lt-id-input","lt-sub","lt-size","lt-listprice","lt-saleprice","lt-saledate","lt-buyer","lt-devcost","lt-transfer","lt-notes"].forEach(id=>document.getElementById(id).value=""); document.getElementById("lt-status").value="available"; }
+  document.getElementById("lot-modal").classList.remove("hidden"); document.getElementById("lot-modal").style.display="flex";
 }
-function closeLotModal() { document.getElementById("lot-modal").classList.add("hidden"); document.getElementById("lot-modal").style.display = "none"; }
+function closeLotModal() { document.getElementById("lot-modal").classList.add("hidden"); document.getElementById("lot-modal").style.display="none"; }
 
 async function saveLot() {
-  const errEl = document.getElementById("lot-modal-error");
-  const lotId = document.getElementById("lt-id-input").value.trim();
-  if (!lotId) { errEl.textContent = "Lot ID is required."; errEl.classList.remove("hidden"); return; }
-  const editId = document.getElementById("lot-edit-id").value;
-  const lot = {
-    id: editId || (Date.now() + "-" + Math.random().toString(36).slice(2,6)),
-    lotId, subdivision: document.getElementById("lt-sub").value.trim(),
-    status: document.getElementById("lt-status").value,
-    size: document.getElementById("lt-size").value.trim(),
-    listPrice: parseFloat(document.getElementById("lt-listprice").value) || null,
-    salePrice: parseFloat(document.getElementById("lt-saleprice").value) || null,
-    saleDate: document.getElementById("lt-saledate").value,
-    buyer: document.getElementById("lt-buyer").value.trim(),
-    devCost: parseFloat(document.getElementById("lt-devcost").value) || null,
-    transferDate: document.getElementById("lt-transfer").value,
-    notes: document.getElementById("lt-notes").value.trim()
-  };
-  const idx = editId ? lotsData.findIndex(x => x.id === editId) : -1;
-  if (idx >= 0) lotsData[idx] = lot; else lotsData.push(lot);
-  try { await saveLots(); closeLotModal(); renderLots(); }
-  catch(e) { errEl.textContent = "Save failed: " + e.message; errEl.classList.remove("hidden"); }
+  const errEl=document.getElementById("lot-modal-error");
+  const lotId=document.getElementById("lt-id-input").value.trim();
+  if (!lotId) { errEl.textContent="Lot ID is required."; errEl.classList.remove("hidden"); return; }
+  const editId=document.getElementById("lot-edit-id").value;
+  const lot={id:editId||(Date.now()+"-"+Math.random().toString(36).slice(2,6)),lotId,subdivision:document.getElementById("lt-sub").value.trim(),status:document.getElementById("lt-status").value,size:document.getElementById("lt-size").value.trim(),listPrice:parseFloat(document.getElementById("lt-listprice").value)||null,salePrice:parseFloat(document.getElementById("lt-saleprice").value)||null,saleDate:document.getElementById("lt-saledate").value,buyer:document.getElementById("lt-buyer").value.trim(),devCost:parseFloat(document.getElementById("lt-devcost").value)||null,transferDate:document.getElementById("lt-transfer").value,notes:document.getElementById("lt-notes").value.trim()};
+  const idx=editId?lotsData.findIndex(x=>x.id===editId):-1;
+  if (idx>=0) lotsData[idx]=lot; else lotsData.push(lot);
+  try { await saveLots(); closeLotModal(); renderLots(); } catch(e) { errEl.textContent="Save failed: "+e.message; errEl.classList.remove("hidden"); }
 }
-
-async function deleteLot(id) {
-  if (!confirm("Delete this lot?")) return;
-  lotsData = lotsData.filter(l => l.id !== id);
-  await saveLots(); renderLots();
-}
+async function deleteLot(id) { if (!confirm("Delete this lot?")) return; lotsData=lotsData.filter(l=>l.id!==id); await saveLots(); renderLots(); }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// SHAREHOLDER LOANS MODULE
+// SHAREHOLDER LOANS
 // ═══════════════════════════════════════════════════════════════════════════════
 const SHLOANS_FILE = "shareholder_loans.json";
 let shLoansData = [];
-let activeShLoanId = null;
 
 async function loadShLoans() {
   if (!account) return;
   try {
-    const token = await getToken();
-    const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-    const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${SHLOANS_FILE}:/content`, {
-      headers: { Authorization: "Bearer " + token }
-    });
-    shLoansData = r.ok ? await r.json() : [];
-  } catch { shLoansData = []; }
+    const token=await getToken(); const rootId=await ensureFolder(token,"root",ROOT_FOLDER);
+    const r=await fetch(`${GRAPH}/me/drive/items/${rootId}:/${SHLOANS_FILE}:/content`,{headers:{Authorization:"Bearer "+token}});
+    shLoansData=r.ok?await r.json():[];
+  } catch { shLoansData=[]; }
   renderShLoans();
 }
 
 async function saveShLoans() {
-  const token = await getToken();
-  const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-  const bytes = new TextEncoder().encode(JSON.stringify(shLoansData, null, 2));
-  const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${SHLOANS_FILE}:/content`, {
-    method: "PUT", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" }, body: bytes
-  });
-  if (!r.ok) throw new Error("SH loans save failed: " + r.status);
+  const token=await getToken(); const rootId=await ensureFolder(token,"root",ROOT_FOLDER);
+  const bytes=new TextEncoder().encode(JSON.stringify(shLoansData,null,2));
+  const r=await fetch(`${GRAPH}/me/drive/items/${rootId}:/${SHLOANS_FILE}:/content`,{method:"PUT",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:bytes});
+  if (!r.ok) throw new Error("SH loans save failed: "+r.status);
 }
 
 function renderShLoans() {
-  const totalOwed = shLoansData.reduce((s,l) => s + (l.balance||0), 0);
-  const byBorrower = {};
-  shLoansData.forEach(l => { if (!byBorrower[l.borrower]) byBorrower[l.borrower] = 0; byBorrower[l.borrower] += (l.balance||0); });
-
-  document.getElementById("shloans-summary").innerHTML = `
+  const total=shLoansData.reduce((s,l)=>s+(l.balance||0),0);
+  const byBorrower={};
+  shLoansData.forEach(l=>{if(!byBorrower[l.borrower])byBorrower[l.borrower]=0;byBorrower[l.borrower]+=(l.balance||0);});
+  document.getElementById("shloans-summary").innerHTML=`
     <div class="summary-card"><div class="summary-label">Total SH Loans</div><div class="summary-value">${shLoansData.length}</div></div>
-    <div class="summary-card"><div class="summary-label">Total Outstanding</div><div class="summary-value neg">$${totalOwed.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
-    ${Object.entries(byBorrower).map(([e,v]) => `<div class="summary-card"><div class="summary-label">Owed by ${ENTITY_ABBREV[e]||e}</div><div class="summary-value neg">$${v.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>`).join("")}
-  `;
-
-  if (!shLoansData.length) {
-    document.getElementById("shloans-list").innerHTML = `<div class="card"><div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-align:center;padding:20px">No shareholder loans recorded. Add loans to track intercompany advances.</div></div>`;
-    return;
-  }
-
-  document.getElementById("shloans-list").innerHTML = shLoansData.map(l => {
-    const paidPct = l.original > 0 ? ((1 - l.balance/l.original)*100).toFixed(1) : 0;
-    const txns = l.transactions || [];
+    <div class="summary-card"><div class="summary-label">Total Outstanding</div><div class="summary-value neg">$${total.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
+    ${Object.entries(byBorrower).map(([e,v])=>`<div class="summary-card"><div class="summary-label">Owed by ${ENTITY_ABBREV[e]||e}</div><div class="summary-value neg">$${v.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>`).join("")}`;
+  if (!shLoansData.length) { document.getElementById("shloans-list").innerHTML=`<div class="card"><div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-align:center;padding:20px">No shareholder loans recorded.</div></div>`; return; }
+  document.getElementById("shloans-list").innerHTML=shLoansData.map(l=>{
+    const paidPct=l.original>0?((1-l.balance/l.original)*100).toFixed(1):0;
+    const txns=l.transactions||[];
     return `<div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div>
-          <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--txt)">${l.name}</div>
-          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:2px">${ENTITY_ABBREV[l.lender]||l.lender} &#8594; ${ENTITY_ABBREV[l.borrower]||l.borrower} &nbsp;&#183;&nbsp; ${l.rate>0?l.rate+"% p.a.":"Interest-Free"} &nbsp;&#183;&nbsp; ${l.terms}</div>
-        </div>
+        <div><div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--txt)">${l.name}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:2px">${ENTITY_ABBREV[l.lender]||l.lender} &rarr; ${ENTITY_ABBREV[l.borrower]||l.borrower} &nbsp;&middot;&nbsp; ${l.rate>0?l.rate+"% p.a.":"Interest-Free"} &nbsp;&middot;&nbsp; ${l.terms}</div></div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-ghost" style="padding:2px 8px;width:auto;font-size:9px" onclick="showShLoanModal('${l.id}')">Edit</button>
           <button class="btn btn-green" style="padding:2px 8px;width:auto;font-size:9px" onclick="showShLTxModal('${l.id}')">+ Txn</button>
@@ -6564,110 +6306,71 @@ function renderShLoans() {
         <div class="loan-kpi"><div class="loan-kpi-label">% Repaid</div><div class="loan-kpi-val pos">${paidPct}%</div></div>
         <div class="loan-kpi"><div class="loan-kpi-label">Established</div><div class="loan-kpi-val" style="font-size:10px">${l.date||"—"}</div></div>
       </div>
-      ${l.notes ? `<div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:8px;font-style:italic">${l.notes}</div>` : ""}
-      ${txns.length ? `
-      <div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Recent Transactions</div>
-      ${txns.slice(-5).reverse().map(tx => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr);font-family:var(--mono);font-size:9px">
+      ${l.notes?`<div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:8px;font-style:italic">${l.notes}</div>`:""}
+      ${txns.length?`<div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Recent Transactions</div>
+      ${txns.slice(-5).reverse().map(tx=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr);font-family:var(--mono);font-size:9px">
         <span style="color:var(--txt3)">${tx.date}</span>
         <span style="color:${tx.type==="advance"?"var(--acc)":tx.type==="repayment"?"var(--grn)":"var(--txt3)"}">${tx.type.toUpperCase()}</span>
         <span>${tx.notes||""}</span>
         <span style="color:${tx.type==="advance"?"var(--acc)":"var(--grn)"}">$${parseFloat(tx.amount).toLocaleString("en-CA",{minimumFractionDigits:2})}</span>
-      </div>`).join("")}` : ""}
+      </div>`).join("")}`:""}
     </div>`;
   }).join("");
 }
 
 function showShLoanModal(editId) {
-  document.getElementById("shloan-modal-title").textContent = editId ? "Edit Shareholder Loan" : "Add Shareholder Loan";
-  document.getElementById("shl-edit-id").value = editId || "";
+  document.getElementById("shloan-modal-title").textContent=editId?"Edit Shareholder Loan":"Add Shareholder Loan";
+  document.getElementById("shl-edit-id").value=editId||"";
   document.getElementById("shloan-modal-error").classList.add("hidden");
-  if (editId) {
-    const l = shLoansData.find(x => x.id === editId);
-    if (l) {
-      document.getElementById("shl-name").value = l.name || "";
-      document.getElementById("shl-lender").value = l.lender || "";
-      document.getElementById("shl-borrower").value = l.borrower || "";
-      document.getElementById("shl-original").value = l.original || "";
-      document.getElementById("shl-balance").value = l.balance || "";
-      document.getElementById("shl-rate").value = l.rate || 0;
-      document.getElementById("shl-date").value = l.date || "";
-      document.getElementById("shl-terms").value = l.terms || "On Demand";
-      document.getElementById("shl-notes").value = l.notes || "";
-    }
-  } else {
-    ["shl-name","shl-original","shl-balance","shl-date","shl-notes"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("shl-rate").value = 0;
-    document.getElementById("shl-terms").value = "On Demand";
-    document.getElementById("shl-date").value = new Date().toISOString().slice(0,10);
-  }
-  document.getElementById("shloan-modal").classList.remove("hidden");
-  document.getElementById("shloan-modal").style.display = "flex";
+  if (editId) { const l=shLoansData.find(x=>x.id===editId); if(l){document.getElementById("shl-name").value=l.name||"";document.getElementById("shl-lender").value=l.lender||"";document.getElementById("shl-borrower").value=l.borrower||"";document.getElementById("shl-original").value=l.original||"";document.getElementById("shl-balance").value=l.balance||"";document.getElementById("shl-rate").value=l.rate||0;document.getElementById("shl-date").value=l.date||"";document.getElementById("shl-terms").value=l.terms||"On Demand";document.getElementById("shl-notes").value=l.notes||"";} }
+  else { ["shl-name","shl-original","shl-balance","shl-date","shl-notes"].forEach(id=>document.getElementById(id).value=""); document.getElementById("shl-rate").value=0; document.getElementById("shl-terms").value="On Demand"; document.getElementById("shl-date").value=new Date().toISOString().slice(0,10); }
+  document.getElementById("shloan-modal").classList.remove("hidden"); document.getElementById("shloan-modal").style.display="flex";
 }
-function closeShLoanModal() { document.getElementById("shloan-modal").classList.add("hidden"); document.getElementById("shloan-modal").style.display = "none"; }
+function closeShLoanModal() { document.getElementById("shloan-modal").classList.add("hidden"); document.getElementById("shloan-modal").style.display="none"; }
 
 async function saveShLoan() {
-  const errEl = document.getElementById("shloan-modal-error");
-  const name = document.getElementById("shl-name").value.trim();
-  const balance = parseFloat(document.getElementById("shl-balance").value);
-  if (!name) { errEl.textContent = "Description is required."; errEl.classList.remove("hidden"); return; }
-  if (isNaN(balance)) { errEl.textContent = "Balance is required."; errEl.classList.remove("hidden"); return; }
-  const editId = document.getElementById("shl-edit-id").value;
-  const loan = {
-    id: editId || (Date.now() + "-" + Math.random().toString(36).slice(2,6)),
-    name, lender: document.getElementById("shl-lender").value,
-    borrower: document.getElementById("shl-borrower").value,
-    original: parseFloat(document.getElementById("shl-original").value) || balance,
-    balance, rate: parseFloat(document.getElementById("shl-rate").value) || 0,
-    date: document.getElementById("shl-date").value,
-    terms: document.getElementById("shl-terms").value,
-    notes: document.getElementById("shl-notes").value.trim(),
-    transactions: editId ? (shLoansData.find(x=>x.id===editId)||{}).transactions || [] : []
-  };
-  const idx = editId ? shLoansData.findIndex(x => x.id === editId) : -1;
-  if (idx >= 0) shLoansData[idx] = loan; else shLoansData.push(loan);
-  try { await saveShLoans(); closeShLoanModal(); renderShLoans(); }
-  catch(e) { errEl.textContent = "Save failed: " + e.message; errEl.classList.remove("hidden"); }
+  const errEl=document.getElementById("shloan-modal-error");
+  const name=document.getElementById("shl-name").value.trim();
+  const balance=parseFloat(document.getElementById("shl-balance").value);
+  if (!name) { errEl.textContent="Description is required."; errEl.classList.remove("hidden"); return; }
+  if (isNaN(balance)) { errEl.textContent="Balance is required."; errEl.classList.remove("hidden"); return; }
+  const editId=document.getElementById("shl-edit-id").value;
+  const loan={id:editId||(Date.now()+"-"+Math.random().toString(36).slice(2,6)),name,lender:document.getElementById("shl-lender").value,borrower:document.getElementById("shl-borrower").value,original:parseFloat(document.getElementById("shl-original").value)||balance,balance,rate:parseFloat(document.getElementById("shl-rate").value)||0,date:document.getElementById("shl-date").value,terms:document.getElementById("shl-terms").value,notes:document.getElementById("shl-notes").value.trim(),transactions:editId?(shLoansData.find(x=>x.id===editId)||{}).transactions||[]:{} };
+  const idx=editId?shLoansData.findIndex(x=>x.id===editId):-1;
+  if (idx>=0) shLoansData[idx]=loan; else shLoansData.push(loan);
+  try { await saveShLoans(); closeShLoanModal(); renderShLoans(); } catch(e) { errEl.textContent="Save failed: "+e.message; errEl.classList.remove("hidden"); }
 }
-
-async function deleteShLoan(id) {
-  if (!confirm("Delete this shareholder loan?")) return;
-  shLoansData = shLoansData.filter(l => l.id !== id);
-  await saveShLoans(); renderShLoans();
-}
+async function deleteShLoan(id) { if (!confirm("Delete this shareholder loan?")) return; shLoansData=shLoansData.filter(l=>l.id!==id); await saveShLoans(); renderShLoans(); }
 
 function showShLTxModal(loanId) {
-  activeShLoanId = loanId;
-  document.getElementById("shltx-loan-id").value = loanId;
-  document.getElementById("shltx-date").value = new Date().toISOString().slice(0,10);
-  document.getElementById("shltx-type").value = "advance";
-  document.getElementById("shltx-amount").value = "";
-  document.getElementById("shltx-notes").value = "";
+  document.getElementById("shltx-loan-id").value=loanId;
+  document.getElementById("shltx-date").value=new Date().toISOString().slice(0,10);
+  document.getElementById("shltx-type").value="advance";
+  document.getElementById("shltx-amount").value="";
+  document.getElementById("shltx-notes").value="";
   document.getElementById("shltx-error").classList.add("hidden");
-  document.getElementById("shl-tx-modal").classList.remove("hidden");
-  document.getElementById("shl-tx-modal").style.display = "flex";
+  document.getElementById("shl-tx-modal").classList.remove("hidden"); document.getElementById("shl-tx-modal").style.display="flex";
 }
-function closeShLTxModal() { document.getElementById("shl-tx-modal").classList.add("hidden"); document.getElementById("shl-tx-modal").style.display = "none"; }
+function closeShLTxModal() { document.getElementById("shl-tx-modal").classList.add("hidden"); document.getElementById("shl-tx-modal").style.display="none"; }
 
 async function saveShLTx() {
-  const errEl = document.getElementById("shltx-error");
-  const loanId = document.getElementById("shltx-loan-id").value;
-  const amount = parseFloat(document.getElementById("shltx-amount").value);
-  if (!amount || amount <= 0) { errEl.textContent = "Amount is required."; errEl.classList.remove("hidden"); return; }
-  const type = document.getElementById("shltx-type").value;
-  const loan = shLoansData.find(l => l.id === loanId);
-  if (!loan) { errEl.textContent = "Loan not found."; errEl.classList.remove("hidden"); return; }
-  const tx = { date: document.getElementById("shltx-date").value, type, amount, notes: document.getElementById("shltx-notes").value.trim() };
-  if (!loan.transactions) loan.transactions = [];
+  const errEl=document.getElementById("shltx-error");
+  const loanId=document.getElementById("shltx-loan-id").value;
+  const amount=parseFloat(document.getElementById("shltx-amount").value);
+  if (!amount||amount<=0) { errEl.textContent="Amount is required."; errEl.classList.remove("hidden"); return; }
+  const type=document.getElementById("shltx-type").value;
+  const loan=shLoansData.find(l=>l.id===loanId);
+  if (!loan) { errEl.textContent="Loan not found."; errEl.classList.remove("hidden"); return; }
+  const tx={date:document.getElementById("shltx-date").value,type,amount,notes:document.getElementById("shltx-notes").value.trim()};
+  if (!loan.transactions) loan.transactions=[];
   loan.transactions.push(tx);
-  // Update balance
-  if (type === "advance") loan.balance = (loan.balance || 0) + amount;
-  else if (type === "repayment") loan.balance = Math.max(0, (loan.balance || 0) - amount);
-  try { await saveShLoans(); closeShLTxModal(); renderShLoans(); }
-  catch(e) { errEl.textContent = "Save failed: " + e.message; errEl.classList.remove("hidden"); }
+  if (type==="advance") loan.balance=(loan.balance||0)+amount;
+  else if (type==="repayment") loan.balance=Math.max(0,(loan.balance||0)-amount);
+  try { await saveShLoans(); closeShLTxModal(); renderShLoans(); } catch(e) { errEl.textContent="Save failed: "+e.message; errEl.classList.remove("hidden"); }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TAX INSTALLMENTS MODULE
+// TAX INSTALLMENTS
 // ═══════════════════════════════════════════════════════════════════════════════
 const TAXINST_FILE = "tax_installments.json";
 let taxInstData = [];
@@ -6675,153 +6378,84 @@ let taxInstData = [];
 async function loadTaxInst() {
   if (!account) return;
   try {
-    const token = await getToken();
-    const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-    const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${TAXINST_FILE}:/content`, {
-      headers: { Authorization: "Bearer " + token }
-    });
-    taxInstData = r.ok ? await r.json() : [];
-  } catch { taxInstData = []; }
-  // Populate year dropdown
-  const years = [...new Set(taxInstData.map(t => t.taxYear))].sort((a,b) => b-a);
-  const sel = document.getElementById("ti-year");
-  const cur = sel.value;
-  sel.innerHTML = `<option value="">All Years</option>` + years.map(y => `<option value="${y}" ${y==cur?"selected":""}>${y}</option>`).join("");
+    const token=await getToken(); const rootId=await ensureFolder(token,"root",ROOT_FOLDER);
+    const r=await fetch(`${GRAPH}/me/drive/items/${rootId}:/${TAXINST_FILE}:/content`,{headers:{Authorization:"Bearer "+token}});
+    taxInstData=r.ok?await r.json():[];
+  } catch { taxInstData=[]; }
+  const years=[...new Set(taxInstData.map(t=>t.taxYear))].sort((a,b)=>b-a);
+  const sel=document.getElementById("ti-year"); const cur=sel.value;
+  sel.innerHTML=`<option value="">All Years</option>`+years.map(y=>`<option value="${y}" ${y==cur?"selected":""}>${y}</option>`).join("");
   renderTaxInst();
 }
 
 async function saveTaxInstData() {
-  const token = await getToken();
-  const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-  const bytes = new TextEncoder().encode(JSON.stringify(taxInstData, null, 2));
-  const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${TAXINST_FILE}:/content`, {
-    method: "PUT", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" }, body: bytes
-  });
-  if (!r.ok) throw new Error("Tax installment save failed: " + r.status);
+  const token=await getToken(); const rootId=await ensureFolder(token,"root",ROOT_FOLDER);
+  const bytes=new TextEncoder().encode(JSON.stringify(taxInstData,null,2));
+  const r=await fetch(`${GRAPH}/me/drive/items/${rootId}:/${TAXINST_FILE}:/content`,{method:"PUT",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:bytes});
+  if (!r.ok) throw new Error("Tax installment save failed: "+r.status);
 }
 
 function renderTaxInst() {
-  const yearFilter = document.getElementById("ti-year").value;
-  const rows = yearFilter ? taxInstData.filter(t => String(t.taxYear) === String(yearFilter)) : taxInstData;
-  const today = new Date().toISOString().slice(0,10);
-
-  const totalDue = rows.reduce((s,t) => s + (parseFloat(t.amountDue)||0), 0);
-  const totalPaid = rows.reduce((s,t) => s + (parseFloat(t.amountPaid)||0), 0);
-  const overdue = rows.filter(t => t.due < today && (parseFloat(t.amountPaid)||0) < (parseFloat(t.amountDue)||0));
-  const upcoming = rows.filter(t => t.due >= today && (parseFloat(t.amountPaid)||0) < (parseFloat(t.amountDue)||0));
-
-  document.getElementById("taxinst-summary").innerHTML = `
+  const yf=document.getElementById("ti-year").value;
+  const rows=yf?taxInstData.filter(t=>String(t.taxYear)===String(yf)):taxInstData;
+  const today=new Date().toISOString().slice(0,10);
+  const totalDue=rows.reduce((s,t)=>s+(parseFloat(t.amountDue)||0),0);
+  const totalPaid=rows.reduce((s,t)=>s+(parseFloat(t.amountPaid)||0),0);
+  const overdue=rows.filter(t=>t.due<today&&(parseFloat(t.amountPaid)||0)<(parseFloat(t.amountDue)||0));
+  const upcoming=rows.filter(t=>t.due>=today&&(parseFloat(t.amountPaid)||0)<(parseFloat(t.amountDue)||0));
+  document.getElementById("taxinst-summary").innerHTML=`
     <div class="summary-card"><div class="summary-label">Total Installments</div><div class="summary-value">${rows.length}</div></div>
     <div class="summary-card"><div class="summary-label">Total Due</div><div class="summary-value neg">$${totalDue.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
     <div class="summary-card"><div class="summary-label">Total Paid</div><div class="summary-value pos">$${totalPaid.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
     <div class="summary-card"><div class="summary-label">Balance Owing</div><div class="summary-value ${(totalDue-totalPaid)>0?"neg":"pos"}">$${(totalDue-totalPaid).toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
     <div class="summary-card"><div class="summary-label">Overdue</div><div class="summary-value ${overdue.length>0?"neg":"pos"}">${overdue.length}</div></div>
-    <div class="summary-card"><div class="summary-label">Upcoming Unpaid</div><div class="summary-value ${upcoming.length>0?"acc":""}">${upcoming.length}</div></div>
-  `;
-
-  if (!rows.length) {
-    document.getElementById("taxinst-list").innerHTML = `<div class="card"><div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-align:center;padding:20px">No installments recorded.</div></div>`;
-    return;
-  }
-
-  // Group by entity+year
-  const grouped = {};
-  rows.forEach(t => {
-    const k = `${t.entity} — Tax Year ${t.taxYear}`;
-    if (!grouped[k]) grouped[k] = [];
-    grouped[k].push(t);
-  });
-
-  document.getElementById("taxinst-list").innerHTML = Object.entries(grouped).map(([key, list]) => `
-    <div class="card">
-      <div class="card-title">${key}</div>
-      <div style="overflow-x:auto">
-        <table class="ledger-table">
-          <thead><tr><th>Quarter</th><th>Type</th><th>Due Date</th><th style="text-align:right">Due</th><th style="text-align:right">Paid</th><th>Pay Date</th><th>Status</th><th></th></tr></thead>
-          <tbody>${list.sort((a,b)=>a.due>b.due?1:-1).map(t => {
-            const due = parseFloat(t.amountDue)||0;
-            const paid = parseFloat(t.amountPaid)||0;
-            const isOverdue = t.due < today && paid < due;
-            const isPaid = paid >= due && due > 0;
-            const statusColor = isPaid ? "var(--grn)" : isOverdue ? "var(--red)" : "var(--acc)";
-            const statusLabel = isPaid ? "Paid" : isOverdue ? "OVERDUE" : "Pending";
-            return `<tr>
-              <td style="font-weight:600">${t.quarter}</td>
-              <td style="color:var(--txt3)">${t.type||""}</td>
-              <td>${t.due}</td>
-              <td style="text-align:right;color:var(--red)">$${due.toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
-              <td style="text-align:right;color:var(--grn)">$${paid.toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
-              <td>${t.payDate||"—"}</td>
-              <td><span style="font-family:var(--mono);font-size:9px;color:${statusColor}">${statusLabel}</span></td>
-              <td>
-                <button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px" onclick="showTaxInstModal('${t.id}')">Edit</button>
-                <button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px;color:var(--red)" onclick="deleteTaxInst('${t.id}')">✕</button>
-              </td>
-            </tr>`;
-          }).join("")}</tbody>
-        </table>
-      </div>
-    </div>`).join("");
+    <div class="summary-card"><div class="summary-label">Upcoming Unpaid</div><div class="summary-value ${upcoming.length>0?"acc":""}">${upcoming.length}</div></div>`;
+  if (!rows.length) { document.getElementById("taxinst-list").innerHTML=`<div class="card"><div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-align:center;padding:20px">No installments recorded.</div></div>`; return; }
+  const grouped={};
+  rows.forEach(t=>{const k=`${t.entity} — Tax Year ${t.taxYear}`;if(!grouped[k])grouped[k]=[];grouped[k].push(t);});
+  document.getElementById("taxinst-list").innerHTML=Object.entries(grouped).map(([key,list])=>`
+    <div class="card"><div class="card-title">${key}</div><div style="overflow-x:auto">
+      <table class="ledger-table"><thead><tr><th>Quarter</th><th>Type</th><th>Due</th><th style="text-align:right">Due</th><th style="text-align:right">Paid</th><th>Pay Date</th><th>Status</th><th></th></tr></thead>
+      <tbody>${list.sort((a,b)=>a.due>b.due?1:-1).map(t=>{
+        const due=parseFloat(t.amountDue)||0; const paid=parseFloat(t.amountPaid)||0;
+        const isOverdue=t.due<today&&paid<due; const isPaid=paid>=due&&due>0;
+        const sc=isPaid?"var(--grn)":isOverdue?"var(--red)":"var(--acc)";
+        const sl=isPaid?"Paid":isOverdue?"OVERDUE":"Pending";
+        return `<tr><td style="font-weight:600">${t.quarter}</td><td style="color:var(--txt3)">${t.type||""}</td><td>${t.due}</td>
+          <td style="text-align:right;color:var(--red)">$${due.toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
+          <td style="text-align:right;color:var(--grn)">$${paid.toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
+          <td>${t.payDate||"—"}</td><td><span style="font-family:var(--mono);font-size:9px;color:${sc}">${sl}</span></td>
+          <td><button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px" onclick="showTaxInstModal('${t.id}')">Edit</button>
+          <button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px;color:var(--red)" onclick="deleteTaxInst('${t.id}')">✕</button></td></tr>`;
+      }).join("")}</tbody></table></div></div>`).join("");
 }
 
 function showTaxInstModal(editId) {
-  document.getElementById("ti-modal-title").textContent = editId ? "Edit Installment" : "Add Tax Installment";
-  document.getElementById("ti-edit-id").value = editId || "";
+  document.getElementById("ti-modal-title").textContent=editId?"Edit Installment":"Add Tax Installment";
+  document.getElementById("ti-edit-id").value=editId||"";
   document.getElementById("ti-modal-error").classList.add("hidden");
-  if (editId) {
-    const t = taxInstData.find(x => x.id === editId);
-    if (t) {
-      document.getElementById("ti-entity").value = t.entity || "";
-      document.getElementById("ti-taxyear").value = t.taxYear || "";
-      document.getElementById("ti-quarter").value = t.quarter || "Q1";
-      document.getElementById("ti-due").value = t.due || "";
-      document.getElementById("ti-amount").value = t.amountDue || "";
-      document.getElementById("ti-paid").value = t.amountPaid || "";
-      document.getElementById("ti-paydate").value = t.payDate || "";
-      document.getElementById("ti-type").value = t.type || "Federal (CRA)";
-      document.getElementById("ti-notes").value = t.notes || "";
-    }
-  } else {
-    ["ti-taxyear","ti-due","ti-amount","ti-paid","ti-paydate","ti-notes"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("ti-taxyear").value = new Date().getFullYear();
-    document.getElementById("ti-quarter").value = "Q1";
-  }
-  document.getElementById("taxinst-modal").classList.remove("hidden");
-  document.getElementById("taxinst-modal").style.display = "flex";
+  if (editId) { const t=taxInstData.find(x=>x.id===editId); if(t){document.getElementById("ti-entity").value=t.entity||"";document.getElementById("ti-taxyear").value=t.taxYear||"";document.getElementById("ti-quarter").value=t.quarter||"Q1";document.getElementById("ti-due").value=t.due||"";document.getElementById("ti-amount").value=t.amountDue||"";document.getElementById("ti-paid").value=t.amountPaid||"";document.getElementById("ti-paydate").value=t.payDate||"";document.getElementById("ti-type").value=t.type||"Federal (CRA)";document.getElementById("ti-notes").value=t.notes||"";} }
+  else { ["ti-taxyear","ti-due","ti-amount","ti-paid","ti-paydate","ti-notes"].forEach(id=>document.getElementById(id).value=""); document.getElementById("ti-taxyear").value=new Date().getFullYear(); document.getElementById("ti-quarter").value="Q1"; }
+  document.getElementById("taxinst-modal").classList.remove("hidden"); document.getElementById("taxinst-modal").style.display="flex";
 }
-function closeTaxInstModal() { document.getElementById("taxinst-modal").classList.add("hidden"); document.getElementById("taxinst-modal").style.display = "none"; }
+function closeTaxInstModal() { document.getElementById("taxinst-modal").classList.add("hidden"); document.getElementById("taxinst-modal").style.display="none"; }
 
 async function saveTaxInst() {
-  const errEl = document.getElementById("ti-modal-error");
-  const taxYear = parseInt(document.getElementById("ti-taxyear").value);
-  const amtDue = parseFloat(document.getElementById("ti-amount").value);
-  if (!taxYear) { errEl.textContent = "Tax year is required."; errEl.classList.remove("hidden"); return; }
-  if (isNaN(amtDue)) { errEl.textContent = "Amount due is required."; errEl.classList.remove("hidden"); return; }
-  const editId = document.getElementById("ti-edit-id").value;
-  const inst = {
-    id: editId || (Date.now() + "-" + Math.random().toString(36).slice(2,6)),
-    entity: document.getElementById("ti-entity").value,
-    taxYear, quarter: document.getElementById("ti-quarter").value,
-    due: document.getElementById("ti-due").value, amountDue: amtDue,
-    amountPaid: parseFloat(document.getElementById("ti-paid").value) || 0,
-    payDate: document.getElementById("ti-paydate").value,
-    type: document.getElementById("ti-type").value,
-    notes: document.getElementById("ti-notes").value.trim()
-  };
-  const idx = editId ? taxInstData.findIndex(x => x.id === editId) : -1;
-  if (idx >= 0) taxInstData[idx] = inst; else taxInstData.push(inst);
-  try { await saveTaxInstData(); closeTaxInstModal(); await loadTaxInst(); }
-  catch(e) { errEl.textContent = "Save failed: " + e.message; errEl.classList.remove("hidden"); }
+  const errEl=document.getElementById("ti-modal-error");
+  const taxYear=parseInt(document.getElementById("ti-taxyear").value);
+  const amtDue=parseFloat(document.getElementById("ti-amount").value);
+  if (!taxYear) { errEl.textContent="Tax year is required."; errEl.classList.remove("hidden"); return; }
+  if (isNaN(amtDue)) { errEl.textContent="Amount due is required."; errEl.classList.remove("hidden"); return; }
+  const editId=document.getElementById("ti-edit-id").value;
+  const inst={id:editId||(Date.now()+"-"+Math.random().toString(36).slice(2,6)),entity:document.getElementById("ti-entity").value,taxYear,quarter:document.getElementById("ti-quarter").value,due:document.getElementById("ti-due").value,amountDue:amtDue,amountPaid:parseFloat(document.getElementById("ti-paid").value)||0,payDate:document.getElementById("ti-paydate").value,type:document.getElementById("ti-type").value,notes:document.getElementById("ti-notes").value.trim()};
+  const idx=editId?taxInstData.findIndex(x=>x.id===editId):-1;
+  if (idx>=0) taxInstData[idx]=inst; else taxInstData.push(inst);
+  try { await saveTaxInstData(); closeTaxInstModal(); await loadTaxInst(); } catch(e) { errEl.textContent="Save failed: "+e.message; errEl.classList.remove("hidden"); }
 }
-
-async function deleteTaxInst(id) {
-  if (!confirm("Delete this installment?")) return;
-  taxInstData = taxInstData.filter(t => t.id !== id);
-  await saveTaxInstData(); await loadTaxInst();
-}
+async function deleteTaxInst(id) { if (!confirm("Delete this installment?")) return; taxInstData=taxInstData.filter(t=>t.id!==id); await saveTaxInstData(); await loadTaxInst(); }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// DIVIDENDS MODULE
+// DIVIDENDS
 // ═══════════════════════════════════════════════════════════════════════════════
 const DIVIDENDS_FILE = "dividends.json";
 let dividendsData = [];
@@ -6829,302 +6463,167 @@ let dividendsData = [];
 async function loadDividends() {
   if (!account) return;
   try {
-    const token = await getToken();
-    const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-    const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${DIVIDENDS_FILE}:/content`, {
-      headers: { Authorization: "Bearer " + token }
-    });
-    dividendsData = r.ok ? await r.json() : [];
-  } catch { dividendsData = []; }
-  const years = [...new Set(dividendsData.map(d => d.taxYear))].sort((a,b) => b-a);
-  const sel = document.getElementById("div-year");
-  const cur = sel.value;
-  sel.innerHTML = `<option value="">All Years</option>` + years.map(y => `<option value="${y}" ${y==cur?"selected":""}>${y}</option>`).join("");
+    const token=await getToken(); const rootId=await ensureFolder(token,"root",ROOT_FOLDER);
+    const r=await fetch(`${GRAPH}/me/drive/items/${rootId}:/${DIVIDENDS_FILE}:/content`,{headers:{Authorization:"Bearer "+token}});
+    dividendsData=r.ok?await r.json():[];
+  } catch { dividendsData=[]; }
+  const years=[...new Set(dividendsData.map(d=>d.taxYear))].sort((a,b)=>b-a);
+  const sel=document.getElementById("div-year"); const cur=sel.value;
+  sel.innerHTML=`<option value="">All Years</option>`+years.map(y=>`<option value="${y}" ${y==cur?"selected":""}>${y}</option>`).join("");
   renderDividends();
 }
 
 async function saveDividendsData() {
-  const token = await getToken();
-  const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-  const bytes = new TextEncoder().encode(JSON.stringify(dividendsData, null, 2));
-  const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${DIVIDENDS_FILE}:/content`, {
-    method: "PUT", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" }, body: bytes
-  });
-  if (!r.ok) throw new Error("Dividends save failed: " + r.status);
+  const token=await getToken(); const rootId=await ensureFolder(token,"root",ROOT_FOLDER);
+  const bytes=new TextEncoder().encode(JSON.stringify(dividendsData,null,2));
+  const r=await fetch(`${GRAPH}/me/drive/items/${rootId}:/${DIVIDENDS_FILE}:/content`,{method:"PUT",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:bytes});
+  if (!r.ok) throw new Error("Dividends save failed: "+r.status);
 }
 
 function renderDividends() {
-  const yearFilter = document.getElementById("div-year").value;
-  const rows = yearFilter ? dividendsData.filter(d => String(d.taxYear) === String(yearFilter)) : dividendsData;
-  const totalGross = rows.reduce((s,d) => s + (parseFloat(d.gross)||0), 0);
-  const totalWHT = rows.reduce((s,d) => s + (parseFloat(d.wht)||0), 0);
-  const eligible = rows.filter(d => d.type === "Eligible").reduce((s,d) => s + (parseFloat(d.gross)||0), 0);
-  const nonElig = rows.filter(d => d.type === "Non-Eligible (Ordinary)").reduce((s,d) => s + (parseFloat(d.gross)||0), 0);
-  const interco = rows.filter(d => d.type === "Intercompany").reduce((s,d) => s + (parseFloat(d.gross)||0), 0);
-
-  document.getElementById("div-summary").innerHTML = `
+  const yf=document.getElementById("div-year").value;
+  const rows=yf?dividendsData.filter(d=>String(d.taxYear)===String(yf)):dividendsData;
+  const totalGross=rows.reduce((s,d)=>s+(parseFloat(d.gross)||0),0);
+  const totalWHT=rows.reduce((s,d)=>s+(parseFloat(d.wht)||0),0);
+  const eligible=rows.filter(d=>d.type==="Eligible").reduce((s,d)=>s+(parseFloat(d.gross)||0),0);
+  const nonElig=rows.filter(d=>d.type==="Non-Eligible (Ordinary)").reduce((s,d)=>s+(parseFloat(d.gross)||0),0);
+  const interco=rows.filter(d=>d.type==="Intercompany").reduce((s,d)=>s+(parseFloat(d.gross)||0),0);
+  document.getElementById("div-summary").innerHTML=`
     <div class="summary-card"><div class="summary-label">Total Declared</div><div class="summary-value neg">$${totalGross.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
     <div class="summary-card"><div class="summary-label">Withholding Tax</div><div class="summary-value neg">$${totalWHT.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
     <div class="summary-card"><div class="summary-label">Net Paid</div><div class="summary-value pos">$${(totalGross-totalWHT).toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
     <div class="summary-card"><div class="summary-label">Eligible</div><div class="summary-value">$${eligible.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
     <div class="summary-card"><div class="summary-label">Non-Eligible</div><div class="summary-value">$${nonElig.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
-    <div class="summary-card"><div class="summary-label">Intercompany</div><div class="summary-value">$${interco.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
-  `;
-
-  if (!rows.length) {
-    document.getElementById("div-list").innerHTML = `<div class="card"><div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-align:center;padding:20px">No dividends recorded.</div></div>`;
-    return;
-  }
-
-  document.getElementById("div-list").innerHTML = `<div class="card">
-    <div style="overflow-x:auto">
-      <table class="ledger-table">
-        <thead><tr><th>Declared</th><th>From</th><th>To</th><th>Type</th><th>Tax Year</th><th style="text-align:right">Gross</th><th style="text-align:right">WHT</th><th style="text-align:right">Net</th><th>Pay Date</th><th></th></tr></thead>
-        <tbody>${[...rows].sort((a,b) => b.declared > a.declared ? 1 : -1).map(d => {
-          const gross = parseFloat(d.gross)||0;
-          const wht = parseFloat(d.wht)||0;
-          return `<tr>
-            <td>${d.declared||"—"}</td>
-            <td><span class="entity-tag">${(ENTITY_ABBREV[d.from]||d.from||"").slice(0,5)}</span></td>
-            <td><span class="entity-tag">${(ENTITY_ABBREV[d.to]||d.to||"").slice(0,5)}</span></td>
-            <td style="font-family:var(--mono);font-size:9px">${d.type}</td>
-            <td>${d.taxYear||"—"}</td>
-            <td style="text-align:right;color:var(--acc)">$${gross.toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
-            <td style="text-align:right;color:var(--red)">$${wht.toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
-            <td style="text-align:right;color:var(--grn)">$${(gross-wht).toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
-            <td>${d.paid||"—"}</td>
-            <td>
-              <button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px" onclick="showDividendModal('${d.id}')">Edit</button>
-              <button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px;color:var(--red)" onclick="deleteDividend('${d.id}')">✕</button>
-            </td>
-          </tr>`;
-        }).join("")}</tbody>
-      </table>
-    </div>
-    ${rows.length ? `<div style="font-family:var(--mono);font-size:9px;color:var(--txt3);padding:10px 0;border-top:1px solid var(--bdr);margin-top:8px">Note: Eligible dividends from CDPCs may attract a dividend tax credit for the recipient. Intercompany dividends between connected corporations are generally tax-free under ITA s.112. Verify with your accountant.</div>` : ""}
-  </div>`;
+    <div class="summary-card"><div class="summary-label">Intercompany</div><div class="summary-value">$${interco.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>`;
+  if (!rows.length) { document.getElementById("div-list").innerHTML=`<div class="card"><div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-align:center;padding:20px">No dividends recorded.</div></div>`; return; }
+  document.getElementById("div-list").innerHTML=`<div class="card"><div style="overflow-x:auto">
+    <table class="ledger-table"><thead><tr><th>Declared</th><th>From</th><th>To</th><th>Type</th><th>Tax Year</th><th style="text-align:right">Gross</th><th style="text-align:right">WHT</th><th style="text-align:right">Net</th><th>Pay Date</th><th></th></tr></thead>
+    <tbody>${[...rows].sort((a,b)=>b.declared>a.declared?1:-1).map(d=>{
+      const gross=parseFloat(d.gross)||0; const wht=parseFloat(d.wht)||0;
+      return `<tr><td>${d.declared||"—"}</td>
+        <td><span class="entity-tag">${(ENTITY_ABBREV[d.from]||d.from||"").slice(0,5)}</span></td>
+        <td><span class="entity-tag">${(ENTITY_ABBREV[d.to]||d.to||"").slice(0,5)}</span></td>
+        <td style="font-family:var(--mono);font-size:9px">${d.type}</td><td>${d.taxYear||"—"}</td>
+        <td style="text-align:right;color:var(--acc)">$${gross.toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
+        <td style="text-align:right;color:var(--red)">$${wht.toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
+        <td style="text-align:right;color:var(--grn)">$${(gross-wht).toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
+        <td>${d.paid||"—"}</td>
+        <td><button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px" onclick="showDividendModal('${d.id}')">Edit</button>
+        <button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px;color:var(--red)" onclick="deleteDividend('${d.id}')">✕</button></td></tr>`;
+    }).join("")}</tbody></table></div></div>`;
 }
 
 function showDividendModal(editId) {
-  document.getElementById("div-modal-title").textContent = editId ? "Edit Dividend" : "Declare Dividend";
-  document.getElementById("dv-edit-id").value = editId || "";
+  document.getElementById("div-modal-title").textContent=editId?"Edit Dividend":"Declare Dividend";
+  document.getElementById("dv-edit-id").value=editId||"";
   document.getElementById("div-modal-error").classList.add("hidden");
-  if (editId) {
-    const d = dividendsData.find(x => x.id === editId);
-    if (d) {
-      document.getElementById("dv-from").value = d.from || "";
-      document.getElementById("dv-to").value = d.to || "";
-      document.getElementById("dv-declared").value = d.declared || "";
-      document.getElementById("dv-paid").value = d.paid || "";
-      document.getElementById("dv-gross").value = d.gross || "";
-      document.getElementById("dv-wht").value = d.wht || "";
-      document.getElementById("dv-type").value = d.type || "Eligible";
-      document.getElementById("dv-year").value = d.taxYear || "";
-      document.getElementById("dv-notes").value = d.notes || "";
-    }
-  } else {
-    ["dv-declared","dv-paid","dv-gross","dv-notes"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("dv-wht").value = "";
-    document.getElementById("dv-declared").value = new Date().toISOString().slice(0,10);
-    document.getElementById("dv-year").value = new Date().getFullYear();
-  }
-  document.getElementById("dividend-modal").classList.remove("hidden");
-  document.getElementById("dividend-modal").style.display = "flex";
+  if (editId) { const d=dividendsData.find(x=>x.id===editId); if(d){document.getElementById("dv-from").value=d.from||"";document.getElementById("dv-to").value=d.to||"";document.getElementById("dv-declared").value=d.declared||"";document.getElementById("dv-paid").value=d.paid||"";document.getElementById("dv-gross").value=d.gross||"";document.getElementById("dv-wht").value=d.wht||"";document.getElementById("dv-type").value=d.type||"Eligible";document.getElementById("dv-year").value=d.taxYear||"";document.getElementById("dv-notes").value=d.notes||"";} }
+  else { ["dv-declared","dv-paid","dv-gross","dv-notes"].forEach(id=>document.getElementById(id).value=""); document.getElementById("dv-wht").value=""; document.getElementById("dv-declared").value=new Date().toISOString().slice(0,10); document.getElementById("dv-year").value=new Date().getFullYear(); }
+  document.getElementById("dividend-modal").classList.remove("hidden"); document.getElementById("dividend-modal").style.display="flex";
 }
-function closeDividendModal() { document.getElementById("dividend-modal").classList.add("hidden"); document.getElementById("dividend-modal").style.display = "none"; }
+function closeDividendModal() { document.getElementById("dividend-modal").classList.add("hidden"); document.getElementById("dividend-modal").style.display="none"; }
 
 async function saveDividend() {
-  const errEl = document.getElementById("div-modal-error");
-  const gross = parseFloat(document.getElementById("dv-gross").value);
-  if (isNaN(gross) || gross <= 0) { errEl.textContent = "Amount is required."; errEl.classList.remove("hidden"); return; }
-  const editId = document.getElementById("dv-edit-id").value;
-  const div = {
-    id: editId || (Date.now() + "-" + Math.random().toString(36).slice(2,6)),
-    from: document.getElementById("dv-from").value, to: document.getElementById("dv-to").value,
-    declared: document.getElementById("dv-declared").value, paid: document.getElementById("dv-paid").value,
-    gross, wht: parseFloat(document.getElementById("dv-wht").value) || 0,
-    type: document.getElementById("dv-type").value, taxYear: parseInt(document.getElementById("dv-year").value),
-    notes: document.getElementById("dv-notes").value.trim()
-  };
-  const idx = editId ? dividendsData.findIndex(x => x.id === editId) : -1;
-  if (idx >= 0) dividendsData[idx] = div; else dividendsData.push(div);
-  try { await saveDividendsData(); closeDividendModal(); await loadDividends(); }
-  catch(e) { errEl.textContent = "Save failed: " + e.message; errEl.classList.remove("hidden"); }
+  const errEl=document.getElementById("div-modal-error");
+  const gross=parseFloat(document.getElementById("dv-gross").value);
+  if (isNaN(gross)||gross<=0) { errEl.textContent="Amount is required."; errEl.classList.remove("hidden"); return; }
+  const editId=document.getElementById("dv-edit-id").value;
+  const div={id:editId||(Date.now()+"-"+Math.random().toString(36).slice(2,6)),from:document.getElementById("dv-from").value,to:document.getElementById("dv-to").value,declared:document.getElementById("dv-declared").value,paid:document.getElementById("dv-paid").value,gross,wht:parseFloat(document.getElementById("dv-wht").value)||0,type:document.getElementById("dv-type").value,taxYear:parseInt(document.getElementById("dv-year").value),notes:document.getElementById("dv-notes").value.trim()};
+  const idx=editId?dividendsData.findIndex(x=>x.id===editId):-1;
+  if (idx>=0) dividendsData[idx]=div; else dividendsData.push(div);
+  try { await saveDividendsData(); closeDividendModal(); await loadDividends(); } catch(e) { errEl.textContent="Save failed: "+e.message; errEl.classList.remove("hidden"); }
 }
-
-async function deleteDividend(id) {
-  if (!confirm("Delete this dividend record?")) return;
-  dividendsData = dividendsData.filter(d => d.id !== id);
-  await saveDividendsData(); await loadDividends();
-}
+async function deleteDividend(id) { if (!confirm("Delete this dividend record?")) return; dividendsData=dividendsData.filter(d=>d.id!==id); await saveDividendsData(); await loadDividends(); }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// BUDGET VS ACTUAL MODULE
+// BUDGET VS ACTUAL
 // ═══════════════════════════════════════════════════════════════════════════════
 const BUDGET_FILE = "budget.json";
 let budgetData = [];
 
 async function loadBudget() {
   if (!account) return;
-  if (ledgerData.length === 0) await loadLedger().catch(() => {});
+  if (ledgerData.length===0) await loadLedger().catch(()=>{});
   try {
-    const token = await getToken();
-    const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-    const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${BUDGET_FILE}:/content`, {
-      headers: { Authorization: "Bearer " + token }
-    });
-    budgetData = r.ok ? await r.json() : [];
-  } catch { budgetData = []; }
-  const curYear = new Date().getFullYear();
-  const years = [...new Set([curYear, curYear-1, ...budgetData.map(b => b.year)])].sort((a,b) => b-a);
-  const sel = document.getElementById("bg-year");
-  const cur = sel.value || curYear;
-  sel.innerHTML = years.map(y => `<option value="${y}" ${y==cur?"selected":""}>${y}</option>`).join("");
+    const token=await getToken(); const rootId=await ensureFolder(token,"root",ROOT_FOLDER);
+    const r=await fetch(`${GRAPH}/me/drive/items/${rootId}:/${BUDGET_FILE}:/content`,{headers:{Authorization:"Bearer "+token}});
+    budgetData=r.ok?await r.json():[];
+  } catch { budgetData=[]; }
+  const curYear=new Date().getFullYear();
+  const years=[...new Set([curYear,curYear-1,...budgetData.map(b=>b.year)])].sort((a,b)=>b-a);
+  const sel=document.getElementById("bg-year"); const cur=sel.value||curYear;
+  sel.innerHTML=years.map(y=>`<option value="${y}" ${y==cur?"selected":""}>${y}</option>`).join("");
   renderBudget();
 }
 
 async function saveBudgetData() {
-  const token = await getToken();
-  const rootId = await ensureFolder(token, "root", ROOT_FOLDER);
-  const bytes = new TextEncoder().encode(JSON.stringify(budgetData, null, 2));
-  const r = await fetch(`${GRAPH}/me/drive/items/${rootId}:/${BUDGET_FILE}:/content`, {
-    method: "PUT", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" }, body: bytes
-  });
-  if (!r.ok) throw new Error("Budget save failed: " + r.status);
+  const token=await getToken(); const rootId=await ensureFolder(token,"root",ROOT_FOLDER);
+  const bytes=new TextEncoder().encode(JSON.stringify(budgetData,null,2));
+  const r=await fetch(`${GRAPH}/me/drive/items/${rootId}:/${BUDGET_FILE}:/content`,{method:"PUT",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:bytes});
+  if (!r.ok) throw new Error("Budget save failed: "+r.status);
 }
 
 function renderBudget() {
-  const entityFilter = document.getElementById("bg-entity").value;
-  const yearFilter = document.getElementById("bg-year").value || String(new Date().getFullYear());
-
-  const lines = budgetData.filter(b =>
-    (!entityFilter || b.entity === entityFilter) &&
-    (!yearFilter || String(b.year) === String(yearFilter))
-  );
-
-  // Calculate actuals from ledger for the filtered entity+year
-  const actualsByCategory = {};
-  ledgerData.filter(e => {
-    const yr = (e.date || e.timestamp || "").slice(0,4);
-    return (!entityFilter || e.entity === entityFilter) && yr === yearFilter;
-  }).forEach(e => {
-    const cat = e.docType || e.description || "Other";
-    if (!actualsByCategory[cat]) actualsByCategory[cat] = 0;
-    actualsByCategory[cat] += (e.amount || 0);
-  });
-
-  const totalBudgeted = lines.reduce((s,b) => s + (parseFloat(b.amount)||0), 0);
-  const totalActual = lines.reduce((s,b) => {
-    // Match ledger entries whose docType or description contains the category keyword
-    const cat = b.category.toLowerCase();
-    const actual = ledgerData.filter(e => {
-      const yr = (e.date || e.timestamp || "").slice(0,4);
-      return (!entityFilter || e.entity === entityFilter) && yr === yearFilter &&
-        e.transactionType === b.type &&
-        ((e.docType||"").toLowerCase().includes(cat) || (e.description||"").toLowerCase().includes(cat));
-    }).reduce((s2, e) => s2 + (e.amount||0), 0);
-    return s + actual;
-  }, 0);
-  const totalVariance = totalBudgeted - totalActual;
-
-  document.getElementById("budget-summary").innerHTML = `
+  const ef=document.getElementById("bg-entity").value;
+  const yf=document.getElementById("bg-year").value||String(new Date().getFullYear());
+  const lines=budgetData.filter(b=>(!ef||b.entity===ef)&&(!yf||String(b.year)===String(yf)));
+  const totalBudgeted=lines.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+  const totalActual=lines.reduce((s,b)=>{
+    const cat=b.category.toLowerCase();
+    const actual=ledgerData.filter(e=>{const yr=(e.date||e.timestamp||"").slice(0,4);return(!ef||e.entity===ef)&&yr===yf&&e.transactionType===b.type&&((e.docType||"").toLowerCase().includes(cat)||(e.description||"").toLowerCase().includes(cat));}).reduce((s2,e)=>s2+(e.amount||0),0);
+    return s+actual;
+  },0);
+  const totalVariance=totalBudgeted-totalActual;
+  document.getElementById("budget-summary").innerHTML=`
     <div class="summary-card"><div class="summary-label">Budget Lines</div><div class="summary-value">${lines.length}</div></div>
     <div class="summary-card"><div class="summary-label">Total Budgeted</div><div class="summary-value">$${totalBudgeted.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
     <div class="summary-card"><div class="summary-label">Total Actual</div><div class="summary-value">$${totalActual.toLocaleString("en-CA",{minimumFractionDigits:2})}</div></div>
-    <div class="summary-card"><div class="summary-label">Variance</div><div class="summary-value ${totalVariance>=0?"pos":"neg"}">$${Math.abs(totalVariance).toLocaleString("en-CA",{minimumFractionDigits:2})} ${totalVariance>=0?"under":"OVER"}</div></div>
-  `;
-
-  const tbody = document.getElementById("budget-tbody");
-  const empty = document.getElementById("budget-empty");
-
-  if (!lines.length) { tbody.innerHTML = ""; empty.classList.remove("hidden"); return; }
+    <div class="summary-card"><div class="summary-label">Variance</div><div class="summary-value ${totalVariance>=0?"pos":"neg"}">$${Math.abs(totalVariance).toLocaleString("en-CA",{minimumFractionDigits:2})} ${totalVariance>=0?"under":"OVER"}</div></div>`;
+  const tbody=document.getElementById("budget-tbody"); const empty=document.getElementById("budget-empty");
+  if (!lines.length) { tbody.innerHTML=""; empty.classList.remove("hidden"); return; }
   empty.classList.add("hidden");
-
-  tbody.innerHTML = lines.map(b => {
-    const budgetAmt = parseFloat(b.amount) || 0;
-    const cat = b.category.toLowerCase();
-    const actual = ledgerData.filter(e => {
-      const yr = (e.date || e.timestamp || "").slice(0,4);
-      return (!entityFilter || e.entity === entityFilter) && yr === yearFilter &&
-        e.transactionType === b.type &&
-        ((e.docType||"").toLowerCase().includes(cat) || (e.description||"").toLowerCase().includes(cat));
-    }).reduce((s,e) => s + (e.amount||0), 0);
-
-    const variance = budgetAmt - actual;
-    const pctUsed = budgetAmt > 0 ? (actual / budgetAmt * 100).toFixed(1) : "—";
-    const overBudget = actual > budgetAmt && budgetAmt > 0;
-    const typeBadge = b.type === "expense"
-      ? `<span class="type-badge type-exp">exp</span>`
-      : `<span class="type-badge type-inc">inc</span>`;
-
-    return `<tr style="${overBudget?"background:#100808":""}">
-      <td style="font-weight:600">${b.category}</td>
-      <td>${typeBadge}</td>
+  tbody.innerHTML=lines.map(b=>{
+    const budgetAmt=parseFloat(b.amount)||0;
+    const cat=b.category.toLowerCase();
+    const actual=ledgerData.filter(e=>{const yr=(e.date||e.timestamp||"").slice(0,4);return(!ef||e.entity===ef)&&yr===yf&&e.transactionType===b.type&&((e.docType||"").toLowerCase().includes(cat)||(e.description||"").toLowerCase().includes(cat));}).reduce((s,e)=>s+(e.amount||0),0);
+    const variance=budgetAmt-actual;
+    const pctUsed=budgetAmt>0?(actual/budgetAmt*100).toFixed(1):"—";
+    const over=actual>budgetAmt&&budgetAmt>0;
+    const typeBadge=b.type==="expense"?`<span class="type-badge type-exp">exp</span>`:`<span class="type-badge type-inc">inc</span>`;
+    return `<tr style="${over?"background:#100808":""}">
+      <td style="font-weight:600">${b.category}</td><td>${typeBadge}</td>
       <td style="text-align:right">$${budgetAmt.toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
       <td style="text-align:right">$${actual.toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
-      <td style="text-align:right;color:${variance>=0?"var(--grn)":"var(--red)"}">
-        ${variance>=0?"$"+variance.toLocaleString("en-CA",{minimumFractionDigits:2})+" under":"-$"+Math.abs(variance).toLocaleString("en-CA",{minimumFractionDigits:2})}
-      </td>
-      <td style="text-align:right;color:${overBudget?"var(--red)":pctUsed>80?"var(--acc)":"var(--txt3)"}">${pctUsed}%</td>
-      <td>
-        <button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px" onclick="showBudgetLineModal('${b.id}')">Edit</button>
-        <button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px;color:var(--red)" onclick="deleteBudgetLine('${b.id}')">✕</button>
-      </td>
-    </tr>`;
+      <td style="text-align:right;color:${variance>=0?"var(--grn)":"var(--red)"}">${variance>=0?"$"+variance.toLocaleString("en-CA",{minimumFractionDigits:2})+" under":"-$"+Math.abs(variance).toLocaleString("en-CA",{minimumFractionDigits:2})}</td>
+      <td style="text-align:right;color:${over?"var(--red)":pctUsed>80?"var(--acc)":"var(--txt3)"}">${pctUsed}%</td>
+      <td><button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px" onclick="showBudgetLineModal('${b.id}')">Edit</button>
+      <button class="btn btn-ghost" style="padding:2px 7px;width:auto;font-size:9px;color:var(--red)" onclick="deleteBudgetLine('${b.id}')">✕</button></td></tr>`;
   }).join("");
 }
 
 function showBudgetLineModal(editId) {
-  document.getElementById("bg-modal-title").textContent = editId ? "Edit Budget Line" : "Add Budget Line";
-  document.getElementById("bg-edit-id").value = editId || "";
+  document.getElementById("bg-modal-title").textContent=editId?"Edit Budget Line":"Add Budget Line";
+  document.getElementById("bg-edit-id").value=editId||"";
   document.getElementById("bgl-modal-error").classList.add("hidden");
-  if (editId) {
-    const b = budgetData.find(x => x.id === editId);
-    if (b) {
-      document.getElementById("bgl-entity").value = b.entity || "";
-      document.getElementById("bgl-year").value = b.year || "";
-      document.getElementById("bgl-cat").value = b.category || "";
-      document.getElementById("bgl-type").value = b.type || "expense";
-      document.getElementById("bgl-amount").value = b.amount || "";
-      document.getElementById("bgl-notes").value = b.notes || "";
-    }
-  } else {
-    ["bgl-cat","bgl-notes"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("bgl-year").value = document.getElementById("bg-year").value || new Date().getFullYear();
-    document.getElementById("bgl-entity").value = document.getElementById("bg-entity").value || "";
-    document.getElementById("bgl-amount").value = "";
-    document.getElementById("bgl-type").value = "expense";
-  }
-  document.getElementById("budget-line-modal").classList.remove("hidden");
-  document.getElementById("budget-line-modal").style.display = "flex";
+  if (editId) { const b=budgetData.find(x=>x.id===editId); if(b){document.getElementById("bgl-entity").value=b.entity||"";document.getElementById("bgl-year").value=b.year||"";document.getElementById("bgl-cat").value=b.category||"";document.getElementById("bgl-type").value=b.type||"expense";document.getElementById("bgl-amount").value=b.amount||"";document.getElementById("bgl-notes").value=b.notes||"";} }
+  else { ["bgl-cat","bgl-notes"].forEach(id=>document.getElementById(id).value=""); document.getElementById("bgl-year").value=document.getElementById("bg-year").value||new Date().getFullYear(); document.getElementById("bgl-entity").value=document.getElementById("bg-entity").value||""; document.getElementById("bgl-amount").value=""; document.getElementById("bgl-type").value="expense"; }
+  document.getElementById("budget-line-modal").classList.remove("hidden"); document.getElementById("budget-line-modal").style.display="flex";
 }
-function closeBudgetLineModal() { document.getElementById("budget-line-modal").classList.add("hidden"); document.getElementById("budget-line-modal").style.display = "none"; }
+function closeBudgetLineModal() { document.getElementById("budget-line-modal").classList.add("hidden"); document.getElementById("budget-line-modal").style.display="none"; }
 
 async function saveBudgetLine() {
-  const errEl = document.getElementById("bgl-modal-error");
-  const cat = document.getElementById("bgl-cat").value.trim();
-  const amount = parseFloat(document.getElementById("bgl-amount").value);
-  if (!cat) { errEl.textContent = "Category is required."; errEl.classList.remove("hidden"); return; }
-  if (isNaN(amount) || amount <= 0) { errEl.textContent = "Amount is required."; errEl.classList.remove("hidden"); return; }
-  const editId = document.getElementById("bg-edit-id").value;
-  const line = {
-    id: editId || (Date.now() + "-" + Math.random().toString(36).slice(2,6)),
-    entity: document.getElementById("bgl-entity").value,
-    year: parseInt(document.getElementById("bgl-year").value),
-    category: cat, type: document.getElementById("bgl-type").value,
-    amount, notes: document.getElementById("bgl-notes").value.trim()
-  };
-  const idx = editId ? budgetData.findIndex(x => x.id === editId) : -1;
-  if (idx >= 0) budgetData[idx] = line; else budgetData.push(line);
-  try { await saveBudgetData(); closeBudgetLineModal(); renderBudget(); }
-  catch(e) { errEl.textContent = "Save failed: " + e.message; errEl.classList.remove("hidden"); }
+  const errEl=document.getElementById("bgl-modal-error");
+  const cat=document.getElementById("bgl-cat").value.trim();
+  const amount=parseFloat(document.getElementById("bgl-amount").value);
+  if (!cat) { errEl.textContent="Category is required."; errEl.classList.remove("hidden"); return; }
+  if (isNaN(amount)||amount<=0) { errEl.textContent="Amount is required."; errEl.classList.remove("hidden"); return; }
+  const editId=document.getElementById("bg-edit-id").value;
+  const line={id:editId||(Date.now()+"-"+Math.random().toString(36).slice(2,6)),entity:document.getElementById("bgl-entity").value,year:parseInt(document.getElementById("bgl-year").value),category:cat,type:document.getElementById("bgl-type").value,amount,notes:document.getElementById("bgl-notes").value.trim()};
+  const idx=editId?budgetData.findIndex(x=>x.id===editId):-1;
+  if (idx>=0) budgetData[idx]=line; else budgetData.push(line);
+  try { await saveBudgetData(); closeBudgetLineModal(); renderBudget(); } catch(e) { errEl.textContent="Save failed: "+e.message; errEl.classList.remove("hidden"); }
 }
-
-async function deleteBudgetLine(id) {
-  if (!confirm("Delete this budget line?")) return;
-  budgetData = budgetData.filter(b => b.id !== id);
-  await saveBudgetData(); renderBudget();
-}
+async function deleteBudgetLine(id) { if (!confirm("Delete this budget line?")) return; budgetData=budgetData.filter(b=>b.id!==id); await saveBudgetData(); renderBudget(); }
 
 
 initAuth();
