@@ -2071,6 +2071,7 @@ PROPERTY DOCUMENTS: Chris Hergott Holdings Ltd and C&H Hergott Capital Inc own r
 If a document relates to a specific rental property (invoice, lease, utility bill, insurance, property tax, permit), set subfolder to "__PROPERTIES__".
 Properties (active only): ${PROPERTIES.filter(p=>p.active).map(p => p.address).join(", ")}.
 Note: properties transferred from CHHL to C&H Cap around mid-2025. Before July 2025 → CHHL. After → C&H Cap. When in doubt use the entity name on the document.
+IMPORTANT: When matching a document to a property, read the full document body and line item descriptions for civic addresses (e.g. "934 10th St", "613 11th St", "6 Main Bay Muenster"). Do NOT guess from the entity name alone — use the address explicitly stated in the work description or service location. Set "propertyAddress" in extracted to the address you find.
 
 For suggestedFilename: use YYYY-MM-DD_EntityAbbrev_VendorShortName_DocType_Reference.pdf
 VendorShortName = short version of vendor/payee name, no spaces, hyphens if needed. Omit if no vendor.
@@ -2093,9 +2094,11 @@ Return exactly this structure:
     "vendor": "<vendor/payee/issuer or null>",
     "amount": "<total amount as plain number string e.g. 1234.56 or null>",
     "currency": "<CAD or USD or null>",
-    "gst": "<GST/HST amount as plain number string or null>",
+    "gst": "<GST/HST/GST amount as plain number string or null>",
+    "pst": "<PST/QST/provincial tax amount as plain number string or null>",
     "reference": "<invoice or document number or null>",
-    "description": "<one-line summary>"
+    "description": "<exact line item description(s) copied verbatim from the document — e.g. work performed, goods supplied, service rendered. For invoices copy the actual description text. For bank statements use the transaction description. Not a summary — use the document's own words>",
+    "propertyAddress": "<full civic address of property mentioned in the document body or line items, or null — e.g. 934 10th St Humboldt>"
   },
   "confidence": "<high|medium|low>",
   "notes": "<any caveats or empty string>"
@@ -2154,6 +2157,7 @@ function renderBatchReview() {
       ext.vendor && `<span style="color:var(--txt3)">Vendor</span> ${ext.vendor}`,
       ext.amount && `<span style="color:var(--txt3)">Amount</span> ${ext.amount}`,
       ext.gst && `<span style="color:var(--txt3)">GST</span> ${ext.gst}`,
+      ext.pst && `<span style="color:var(--txt3)">PST</span> ${ext.pst}`,
       ext.reference && `<span style="color:var(--txt3)">Ref</span> ${ext.reference}`,
     ].filter(Boolean).map(m => `<span style="font-family:var(--mono);font-size:9px;background:var(--surf2);padding:2px 6px;border-radius:1px;border:1px solid var(--bdr)">${m}</span>`).join("");
 
@@ -2193,8 +2197,9 @@ function renderBatchReview() {
           <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Property</div>
           <select class="review-select" id="prop-${i}" onchange="updateReviewPath(${i})">
             ${PROPERTIES.map(p => {
-              // Pre-select if Claude's description mentions this property
-              const matches = a.description && a.description.includes(p.address.split(" ")[0]);
+              // Pre-select using Claude's explicit propertyAddress field, then fall back to description text
+              const claudeAddr = (a.extracted && a.extracted.propertyAddress) || a.description || "";
+              const matches = claudeAddr.toLowerCase().includes(p.address.split(" ")[0].toLowerCase());
               return `<option value="${p.address}" ${matches ? "selected" : ""}${!p.active ? " style=\"color:var(--txt3)\" disabled" : ""}>${p.address}${!p.active ? " (Sold)" : ""}</option>`;
             }).join("")}
           </select>
@@ -2694,6 +2699,7 @@ async function updateLedger(token, rootId, a, filename) {
     amount: ext.amount ? parseFloat(ext.amount) : null,
     currency: ext.currency || "CAD",
     gst: ext.gst ? parseFloat(ext.gst) : null,
+    pst: ext.pst ? parseFloat(ext.pst) : null,
     reference: ext.reference || null,
     filename
   };
