@@ -456,40 +456,26 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
       <div class="card-title">01 — Document Input</div>
 
       <div class="field">
-        <label>Upload PDF</label>
+        <label>Upload PDFs (select multiple)</label>
         <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()"
           ondragover="event.preventDefault();this.classList.add('drag')"
           ondragleave="this.classList.remove('drag')"
           ondrop="handleDrop(event)">
           <div class="dz-icon">📄</div>
-          <div class="dz-main">Click to select a PDF</div>
-          <div class="dz-sub">or drag and drop</div>
+          <div class="dz-main">Click to select PDFs</div>
+          <div class="dz-sub">or drag and drop — multiple files supported</div>
         </div>
-        <div class="file-chip hidden" id="file-chip">
-          <div class="file-chip-icon">📄</div>
-          <div class="file-chip-info">
-            <div class="file-chip-name" id="chip-name"></div>
-            <div class="file-chip-size" id="chip-size"></div>
-          </div>
-          <button class="btn-x" onclick="clearFile()">✕</button>
-        </div>
-        <input type="file" id="file-input" accept=".pdf" style="display:none" onchange="handleFileSelect(this)">
-      </div>
-
-      <div class="or-div">or</div>
-
-      <div class="field">
-        <label>OneDrive / SharePoint URL</label>
-        <input type="url" id="pdf-url" placeholder="https://..." oninput="checkReady()">
+        <div id="file-list" style="margin-top:8px"></div>
+        <input type="file" id="file-input" accept=".pdf" multiple style="display:none" onchange="handleFileSelect(this)">
       </div>
 
       <div class="field">
         <label>Notes (optional)</label>
-        <textarea id="notes" placeholder="Any context to help classify this document..."></textarea>
+        <textarea id="notes" placeholder="Any context to help classify these documents..."></textarea>
       </div>
 
       <button class="btn btn-primary" id="btn-analyse" onclick="runAnalysis()" disabled>
-        Analyse Document
+        Analyse Documents
       </button>
     </div>
 
@@ -501,27 +487,16 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
         <div class="spin-msg" id="spin-msg">Preparing...</div>
         <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
       </div>
+      <div id="batch-progress" style="margin-top:12px"></div>
     </div>
 
     <!-- Panel 2: Confirm -->
     <div class="card hidden" id="p2">
       <div class="card-title">03 — Review & Confirm</div>
-      <div class="analysis-block" id="analysis-block"></div>
-      <div id="kv-section"></div>
-      <div id="notes-display"></div>
-
-      <div class="field">
-        <label>Override Filename</label>
-        <input type="text" id="ov-name" placeholder="Leave blank to use suggested">
-      </div>
-      <div class="field">
-        <label>Override Folder Path</label>
-        <input type="text" id="ov-path" placeholder="Leave blank to use suggested">
-      </div>
-
-      <div class="btn-row">
+      <div id="batch-review"></div>
+      <div class="btn-row" style="margin-top:14px">
         <button class="btn btn-ghost" onclick="resetApp()">Start Over</button>
-        <button class="btn btn-green" onclick="runSave()">Save to OneDrive</button>
+        <button class="btn btn-green" onclick="runSave()">File All to OneDrive</button>
       </div>
     </div>
 
@@ -534,13 +509,9 @@ var st,ct,ut,lt,dt,ht,pt,gt,ft,mt=function(){function t(e,t,r){this.networkInter
     <!-- Panel 4: Done -->
     <div class="card hidden" id="p4">
       <div class="card-title">✓ Filed</div>
-      <div class="success-wrap">
-        <div class="success-icon">✓</div>
-        <div class="success-title">Document Filed Successfully</div>
-        <div class="success-path" id="done-path"></div>
-      </div>
-      <div id="done-log"></div>
-      <button class="btn btn-ghost" style="margin-top:12px" onclick="resetApp()">File Another Document</button>
+      <div id="done-summary"></div>
+      <div id="done-log" style="margin-top:10px"></div>
+      <button class="btn btn-ghost" style="margin-top:12px" onclick="resetApp()">File More Documents</button>
     </div>
 
   </div><!-- /app-panels -->
@@ -591,7 +562,9 @@ let graphToken = null;
 let apiKey = localStorage.getItem("hdm_api_key") || "";
 
 // ── State ────────────────────────────────────────────────────────────────────
-let state = { file: null, b64: null, url: "", analysis: null };
+let state = { files: [], analyses: [] };
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 async function initAuth() {
@@ -662,39 +635,49 @@ function promptApiKey() {
 
 // ── File handling ─────────────────────────────────────────────────────────────
 function handleFileSelect(input) {
-  const f = input.files[0];
-  if (!f) return;
-  if (f.type !== "application/pdf") { showError("Please select a PDF file."); return; }
+  const files = Array.from(input.files).filter(f => f.type === "application/pdf");
+  if (!files.length) { showError("Please select PDF files only."); return; }
   clearError();
-  state.file = f;
-  state.url = "";
-  document.getElementById("pdf-url").value = "";
-  document.getElementById("dropzone").classList.add("hidden");
-  document.getElementById("file-chip").classList.remove("hidden");
-  document.getElementById("chip-name").textContent = f.name;
-  document.getElementById("chip-size").textContent = (f.size / 1024).toFixed(1) + " KB";
+  // Merge with existing, deduplicate by name
+  const existing = state.files.map(f => f.name);
+  files.forEach(f => { if (!existing.includes(f.name)) state.files.push(f); });
+  renderFileList();
   checkReady();
 }
 
 function handleDrop(e) {
   e.preventDefault();
   document.getElementById("dropzone").classList.remove("drag");
-  const f = e.dataTransfer.files[0];
-  if (f) { document.getElementById("file-input").files = e.dataTransfer.files; handleFileSelect(document.getElementById("file-input")); }
+  const dt = e.dataTransfer;
+  if (dt.files.length) {
+    // Assign to file input for consistency
+    document.getElementById("file-input").files = dt.files;
+    handleFileSelect(document.getElementById("file-input"));
+  }
 }
 
-function clearFile() {
-  state.file = null; state.b64 = null;
-  document.getElementById("file-input").value = "";
-  document.getElementById("dropzone").classList.remove("hidden");
-  document.getElementById("file-chip").classList.add("hidden");
+function renderFileList() {
+  const container = document.getElementById("file-list");
+  if (!state.files.length) { container.innerHTML = ""; return; }
+  container.innerHTML = state.files.map((f, i) => `
+    <div class="file-chip" style="margin-bottom:5px">
+      <div class="file-chip-icon">📄</div>
+      <div class="file-chip-info">
+        <div class="file-chip-name">${f.name}</div>
+        <div class="file-chip-size">${(f.size/1024).toFixed(1)} KB</div>
+      </div>
+      <button class="btn-x" onclick="removeFile(${i})">✕</button>
+    </div>`).join("");
+}
+
+function removeFile(i) {
+  state.files.splice(i, 1);
+  renderFileList();
   checkReady();
 }
 
 function checkReady() {
-  const url = document.getElementById("pdf-url").value.trim();
-  state.url = url;
-  document.getElementById("btn-analyse").disabled = !(state.file || url);
+  document.getElementById("btn-analyse").disabled = state.files.length === 0;
 }
 
 // ── Panel management ──────────────────────────────────────────────────────────
@@ -743,34 +726,65 @@ function addLog(containerId, msg, type) {
 }
 
 // ── Analysis ──────────────────────────────────────────────────────────────────
+// ── Analysis ──────────────────────────────────────────────────────────────────
 async function runAnalysis() {
   clearError();
   showPanel(1);
   setStatus("Analysing", "busy");
+  state.analyses = [];
+  document.getElementById("batch-progress").innerHTML = "";
 
-  try {
-    let b64 = null;
-    if (state.file) {
-      setProgress(15, "Reading file...");
-      b64 = await toBase64(state.file);
-      state.b64 = b64;
+  if (!apiKey) { promptApiKey(); if (!apiKey) { showPanel(0); return; } }
+
+  const notes = document.getElementById("notes").value.trim();
+  const total = state.files.length;
+
+  for (let i = 0; i < total; i++) {
+    const f = state.files[i];
+    const pct = Math.round((i / total) * 90);
+    setProgress(pct, `Analysing ${i+1} of ${total}: ${f.name}`);
+    addBatchProgress(f.name, "busy");
+
+    try {
+      const b64 = await toBase64(f);
+      const analysis = await analyseFile(b64, notes);
+      state.analyses.push({ file: f, b64, analysis, status: "pending" });
+      updateBatchProgress(i, f.name, "ok", analysis.suggestedFilename);
+    } catch(e) {
+      state.analyses.push({ file: f, b64: null, analysis: null, status: "error", error: e.message });
+      updateBatchProgress(i, f.name, "err", "Failed: " + e.message);
     }
+  }
 
-    setProgress(35, "Sending to Claude...");
+  setProgress(100, "Analysis complete");
+  setTimeout(() => { renderBatchReview(); showPanel(2); setStatus(account.username, "ok"); }, 300);
+}
 
-    const content = [];
-    if (b64) {
-      content.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: b64 } });
-    } else {
-      content.push({ type: "text", text: `OneDrive URL provided: ${state.url}\nClassify based on URL structure. Set extraction fields to null where content unavailable.` });
-    }
+function addBatchProgress(name, type) {
+  const c = document.getElementById("batch-progress");
+  const d = document.createElement("div");
+  d.className = "log-entry " + type;
+  d.textContent = "⏳ " + name;
+  c.appendChild(d);
+}
 
-    const notes = document.getElementById("notes").value.trim();
-    if (notes) content.push({ type: "text", text: "User notes: " + notes });
+function updateBatchProgress(i, name, type, detail) {
+  const c = document.getElementById("batch-progress");
+  const el = c.children[i];
+  if (el) {
+    el.className = "log-entry " + type;
+    el.textContent = (type === "ok" ? "✓ " : "✗ ") + name + (detail ? " → " + detail : "");
+  }
+}
 
-    content.push({
-      type: "text",
-      text: `Analyse this document. Respond ONLY with valid JSON — no markdown, no preamble, no explanation.
+async function analyseFile(b64, notes) {
+  const content = [
+    { type: "document", source: { type: "base64", media_type: "application/pdf", data: b64 } }
+  ];
+  if (notes) content.push({ type: "text", text: "User notes: " + notes });
+  content.push({
+    type: "text",
+    text: `Analyse this document. Respond ONLY with valid JSON — no markdown, no preamble, no explanation.
 
 Taxonomy: ${JSON.stringify(TAXONOMY)}
 Root folder: "${ROOT_FOLDER}"
@@ -785,13 +799,13 @@ Entity abbreviations for filenames:
 - C&H Hergott Capital Inc → CHHCI
 
 For suggestedFilename: use YYYY-MM-DD_EntityAbbrev_VendorShortName_DocType_Reference.pdf
-VendorShortName = short version of vendor/payee name (e.g. "Telus", "SASK-Energy", "CRA"), no spaces, use hyphens if needed. If no vendor, omit.
+VendorShortName = short version of vendor/payee name, no spaces, hyphens if needed. Omit if no vendor.
 
 Return exactly this structure:
 {
   "entity": "<exact entity key from taxonomy>",
   "subfolder": "<exact subfolder name for that entity>",
-  "docType": "<brief document type e.g. Invoice, Bank Statement, Corporate Resolution>",
+  "docType": "<brief document type>",
   "suggestedFilename": "<YYYY-MM-DD_EntityAbbrev_Vendor_DocType_Reference.pdf>",
   "onedrivePath": "${ROOT_FOLDER}/<entity>/<subfolder>",
   "extracted": {
@@ -800,40 +814,22 @@ Return exactly this structure:
     "amount": "<total amount with currency or null>",
     "gst": "<GST/HST amount or null>",
     "reference": "<invoice or document number or null>",
-    "description": "<one-line summary of what this document is>"
+    "description": "<one-line summary>"
   },
   "confidence": "<high|medium|low>",
   "notes": "<any caveats or empty string>"
 }`
-    });
+  });
 
-    setProgress(55, "Claude is reading...");
-
-    if (!apiKey) { promptApiKey(); if (!apiKey) throw new Error("API key required"); }
-
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content }] })
-    });
-
-    setProgress(80, "Parsing response...");
-
-    const data = await resp.json();
-    if (data.error) throw new Error(data.error.message);
-
-    const raw = (data.content || []).map(c => c.text || "").join("");
-    const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
-    state.analysis = parsed;
-
-    setProgress(100, "Done");
-    setTimeout(() => { renderConfirm(parsed); showPanel(2); setStatus(account.username, "ok"); }, 350);
-
-  } catch (e) {
-    showPanel(0);
-    setStatus("Error", "err");
-    showError("Analysis failed: " + e.message);
-  }
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+    body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content }] })
+  });
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  const raw = (data.content || []).map(c => c.text || "").join("");
+  return JSON.parse(raw.replace(/```json|```/g, "").trim());
 }
 
 function toBase64(f) {
@@ -845,33 +841,28 @@ function toBase64(f) {
   });
 }
 
-function renderConfirm(a) {
-  const conf = a.confidence || "medium";
-  const confClass = "conf-" + conf;
-
-  document.getElementById("analysis-block").innerHTML = `
-    <div class="a-row"><div class="a-key">Entity</div><div class="a-val acc">${a.entity}</div></div>
-    <div class="a-row"><div class="a-key">Type</div><div class="a-val">${a.docType}</div></div>
-    <div class="a-row"><div class="a-key">Filename</div><div class="a-val" style="font-size:10px">${a.suggestedFilename}</div></div>
-    <div class="a-row"><div class="a-key">Path</div><div class="a-val grn">${a.onedrivePath}</div></div>
-    <div class="a-row" style="border-bottom:none"><div class="a-key">Confidence</div><div class="a-val"><span class="conf-badge ${confClass}">${conf.toUpperCase()}</span></div></div>
-  `;
-
-  const ext = a.extracted || {};
-  const kvItems = Object.entries(ext).filter(([,v]) => v).map(([k,v]) =>
-    `<div class="kv-item"><div class="kv-key">${k}</div><div class="kv-val">${v}</div></div>`
-  ).join("");
-
-  document.getElementById("kv-section").innerHTML = kvItems
-    ? `<div style="font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px">Extracted Data</div><div class="kv-grid">${kvItems}</div>`
-    : "";
-
-  document.getElementById("notes-display").innerHTML = a.notes
-    ? `<div style="font-family:var(--mono);font-size:10px;color:var(--txt3);padding:7px 9px;background:var(--surf2);border-radius:2px;margin-bottom:10px">${a.notes}</div>`
-    : "";
-
-  document.getElementById("ov-name").value = "";
-  document.getElementById("ov-path").value = "";
+function renderBatchReview() {
+  const container = document.getElementById("batch-review");
+  container.innerHTML = state.analyses.map((item, i) => {
+    if (item.status === "error") {
+      return `<div class="analysis-block" style="margin-bottom:10px">
+        <div class="a-row"><div class="a-key">File</div><div class="a-val" style="color:var(--red)">${item.file.name}</div></div>
+        <div class="a-row" style="border:none"><div class="a-key">Error</div><div class="a-val" style="color:var(--red)">${item.error}</div></div>
+      </div>`;
+    }
+    const a = item.analysis;
+    const conf = a.confidence || "medium";
+    return `<div class="analysis-block" style="margin-bottom:10px">
+      <div class="a-row"><div class="a-key">File</div><div class="a-val" style="font-size:10px;color:var(--txt2)">${item.file.name}</div></div>
+      <div class="a-row"><div class="a-key">Entity</div><div class="a-val acc">${a.entity}</div></div>
+      <div class="a-row"><div class="a-key">Type</div><div class="a-val">${a.docType}${a.extracted&&a.extracted.vendor?' — '+a.extracted.vendor:''}</div></div>
+      <div class="a-row"><div class="a-key">Filename</div><div class="a-val" style="font-size:10px">
+        <input type="text" value="${a.suggestedFilename}" id="fn-${i}" style="background:var(--surf);border:1px solid var(--bdr);border-radius:2px;color:var(--txt);font-family:var(--mono);font-size:10px;padding:4px 7px;width:100%">
+      </div></div>
+      <div class="a-row"><div class="a-key">Path</div><div class="a-val grn">${a.onedrivePath}</div></div>
+      <div class="a-row" style="border:none"><div class="a-key">Confidence</div><div class="a-val"><span class="conf-badge conf-${conf}">${conf.toUpperCase()}</span></div></div>
+    </div>`;
+  }).join("");
 }
 
 // ── Save ──────────────────────────────────────────────────────────────────────
