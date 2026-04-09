@@ -1,15 +1,4 @@
 <!DOCTYPE html>
-<html>
-<head><title>Auth</title></head>
-<body>
-<script src="https://alcdn.msauth.net/browser/2.38.4/js/msal-browser.js"></script>
-<script>
-if (window.msal) {
-  const instance = new window.msal.PublicClientApplication({
-    auth: { clientId: "fe6eb13e-8ea4-4eb4-9162-0c6cd68822a0" }
-  });
-  instance.initialize().then(() => instance.handleRedirectPromise());
-}
-</script>
-</body>
+<html><head><title>Auth Redirect</title></head>
+<body><script>window.close();</script></body>
 </html>
